@@ -50,7 +50,6 @@ public class GameManager : MonoBehaviour
         GenerateButtonColorsList();
         InitiateBoard();
         InitiateTime();
-        DisableInteractableButtons();
     }
 
     // Update is called once per frame
@@ -142,7 +141,7 @@ public class GameManager : MonoBehaviour
             }
 
             
-            newButton.onClick.AddListener(() => OnButtonClick(newButton));
+            newButton.onClick.AddListener(() => OnGameButtonClick(newButton));
             gameButtons[i] = newButton;
         }
     }
@@ -159,34 +158,28 @@ public class GameManager : MonoBehaviour
         ChangeState(GameManagerState.Win);
     }
     
-    private void OnButtonClick(Button button)
+    private void OnGameButtonClick(Button gameButton)
     {
-        StartCoroutine(PlayerButtonClickRoutine(button));
+        if (currentState == GameManagerState.PlayerTurn)
+        {
+            StartCoroutine(PlayerButtonClickRoutine(gameButton));
+        }
     }
 
-    private IEnumerator PlayerButtonClickRoutine(Button button)
+    private IEnumerator PlayerButtonClickRoutine(Button gameButton)
     {
-        // if (isButtonEnabled)
-        // {
-        //     isButtonEnabled = false;
-        //     StartCoroutine(ButtonClickRoutine(button));
-        //     isButtonEnabled = true;
-        // }
-        DisableInteractableButtons();
-        
-        //light the button so player can be sure he pushed it
         yield return new WaitForSeconds(0.2f);
         
-        button.GetComponent<Image>().sprite = topButtonSprite;
-        button.GetComponent<AudioSource>().Play();
+        gameButton.GetComponent<Image>().sprite = topButtonSprite;
+        gameButton.GetComponent<AudioSource>().Play();
         scoring += levelData.pointsPerStep;
         scoreText.text = $"score: {scoring}";
         
         yield return new WaitForSeconds(0.2f);
-        button.GetComponent<Image>().sprite = buttonSprite;
+        gameButton.GetComponent<Image>().sprite = buttonSprite;
         
         //if button not match the game has ended
-        if (button != playSequnce[playerCurPlaySequenceListIndex])
+        if (gameButton != playSequnce[playerCurPlaySequenceListIndex])
         {
             ChangeState(GameManagerState.Lose);
         }
@@ -196,10 +189,6 @@ public class GameManager : MonoBehaviour
             if (playerCurPlaySequenceListIndex >= playSequnce.Count)
             {
                 ChangeState(GameManagerState.SequencePlay);
-            }
-            else
-            {
-                EnableInteractableButtons();
             }
         }
     }
@@ -211,8 +200,6 @@ public class GameManager : MonoBehaviour
         playSequnce.Add(randomButton);
 
         StartCoroutine(SequencePlayRoutine());
-
-        ChangeState(GameManagerState.PlayerTurn);
     }
     
     private IEnumerator SequencePlayRoutine()
@@ -229,34 +216,20 @@ public class GameManager : MonoBehaviour
         {
             yield return new WaitForSeconds(delay);
             
-            Button button = playSequnce[i];
+            Button gameButton = playSequnce[i];
             
             yield return new WaitForSeconds(0.2f);
         
-            button.GetComponent<Image>().sprite = topButtonSprite;
-            button.GetComponent<AudioSource>().Play();
+            gameButton.GetComponent<Image>().sprite = topButtonSprite;
+            gameButton.GetComponent<AudioSource>().Play();
 
             yield return new WaitForSeconds(0.2f);
-            button.GetComponent<Image>().sprite = buttonSprite;
+            gameButton.GetComponent<Image>().sprite = buttonSprite;
         }
+        
+        ChangeState(GameManagerState.PlayerTurn);
     }
-    
-    void EnableInteractableButtons()
-    {
-        for (int i = 0; i < gameButtons.Length; i++)
-        {
-            gameButtons[i].interactable = true;
-        }
-    }
-    
-    void DisableInteractableButtons()
-    {
-        for (int i = 0; i < gameButtons.Length; i++)
-        {
-            gameButtons[i].interactable = false;
-        }
-    }
-    
+
     private bool ChangeState(GameManagerState newState)
     {
         bool didChange = false;
@@ -295,17 +268,12 @@ public class GameManager : MonoBehaviour
         switch (currentState)
         {
             case GameManagerState.Idle:
-                DisableInteractableButtons();
                 break;
             case GameManagerState.SequencePlay:
-                DisableInteractableButtons();
-                //disable clock
                 PlaySequence();
                 break;
             case GameManagerState.PlayerTurn:
                 playerCurPlaySequenceListIndex = 0;
-                //enable clock
-                EnableInteractableButtons();
                 break;
             case GameManagerState.Win:
                 Debug.Log("You Win");
@@ -322,7 +290,6 @@ public class GameManager : MonoBehaviour
         Idle,
         SequencePlay,
         PlayerTurn,
-        Running,
         Win,
         Lose
     }
