@@ -2,5 +2,5 @@
 
 interface IConfigurationLoader
 {
-    public Dictionary<string, object> LoadConfiguration(string filePath);
+    public Dictionary<string, Dictionary<string, object>> LoadConfiguration(string filePath);
 }

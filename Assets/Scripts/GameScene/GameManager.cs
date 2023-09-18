@@ -47,17 +47,12 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        InitiateLevelDate();
         GenerateButtonColorsList();
         InitiateBoard();
         InitiateTime();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-       
-    }
-    
     private void OnEnable()
     {
         Subscribe();
@@ -82,29 +77,29 @@ public class GameManager : MonoBehaviour
     {
         ChangeState(GameManagerState.SequencePlay);
     }
+
+    private void InitiateLevelDate()
+    {
+        Dictionary<string, object> levelConfiguration = LevelConfigurationHolder.Configuration;
+        levelData.UpdateLevelData(
+            (int)levelConfiguration[GameConfigurationKeys.NumOfGameButtons],
+            (int)levelConfiguration[GameConfigurationKeys.PointsPerStep],
+            (int)levelConfiguration[GameConfigurationKeys.GameTime],
+            (bool)levelConfiguration[GameConfigurationKeys.RepeatMode],
+            (float)levelConfiguration[GameConfigurationKeys.GameSpeed]);
+    }
     
     private void GenerateButtonColorsList()
     {
-        HashSet<Color> colorSet = new HashSet<Color>(); // Keep track of unique colors
-        gameButtonsColors = new Color[levelData.gameButtons];
-        
-        for (int i = 0; i < gameButtonsColors.Length; i++)
+        gameButtonsColors = new Color[]
         {
-            Color newColor;
-            
-            do
-            {
-                float r = Random.Range(0f, 1f);
-                float g = Random.Range(0f, 1f);
-                float b = Random.Range(0f, 1f);
-
-                newColor = new Color(r, g, b);
-            }
-            while (colorSet.Contains(newColor)); 
-            
-            colorSet.Add(newColor);
-            gameButtonsColors[i] = newColor;
-        }
+            Color.red,
+            Color.green,
+            Color.blue,
+            Color.yellow,
+            Color.magenta,
+            Color.cyan
+        };
     }
 
     private void InitiateTime()
@@ -114,7 +109,7 @@ public class GameManager : MonoBehaviour
     }
     private void InitiateBoard()
     {
-        gameButtons = new Button[levelData.gameButtons];
+        gameButtons = new Button[levelData.numOfGameButtons];
         for (int i = 0; i < gameButtons.Length; i++)
         {
             Button newButton = Instantiate(buttonPrefab, board.transform);

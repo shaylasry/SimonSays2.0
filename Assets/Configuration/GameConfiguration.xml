@@ -1,0 +1,23 @@
+﻿<Configurations>
+    <Easy>
+        <numOfGameButtons>4</numOfGameButtons>
+        <pointsPerStep>1</pointsPerStep>
+        <gameTime>50</gameTime>
+        <repeatMode>true</repeatMode>
+        <gameSpeed>1.0</gameSpeed>
+    </Easy>
+    <Medium>
+        <numOfGameButtons>5</numOfGameButtons>
+        <pointsPerStep>2</pointsPerStep>
+        <gameTime>45</gameTime>
+        <repeatMode>true</repeatMode>
+        <gameSpeed>1.25</gameSpeed>
+    </Medium>
+    <Hard>
+        <numOfGameButtons>6</numOfGameButtons>
+        <pointsPerStep>3</pointsPerStep>
+        <gameTime>30</gameTime>
+        <repeatMode>false</repeatMode>
+        <gameSpeed>1.5</gameSpeed>
+    </Hard>
+</Configurations>

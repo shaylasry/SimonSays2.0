@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 
 //menu manager documentation:
@@ -16,26 +18,10 @@ using UnityEngine.SceneManagement;
 
 public class MenuManager : MonoBehaviour
 {
-    private LevelData levelData = LevelData.Instance;
-    
     [SerializeField] private UserNameWindow userNameWindow;
     [SerializeField] private LevelSelectionMenu levelSelectionMenu;
     public MenuManagerState currentState { get; private set; } = MenuManagerState.UserNameInsertion;
 
-    void Awake()
-    {
-    }
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-    }
-    
     private void OnEnable()
     {
         Subscribe();
@@ -62,8 +48,8 @@ public class MenuManager : MonoBehaviour
     {
         ChangeState(MenuManagerState.LevelSelection);
     }
-    
-    public void OnPlayerDidPickLevel(string difficulty)
+
+    public void OnPlayerDidPickLevel()
     {
         ChangeState(MenuManagerState.StartGame);
     }

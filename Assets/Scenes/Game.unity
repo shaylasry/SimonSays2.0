@@ -283,6 +283,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 186307ccf090b9e4cb5ade7251a8a0f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameConfigurationFilePath: Assets/Configuration/GameConfiguration.json
   scoreText: {fileID: 114991146}
   countdownText: {fileID: 568405168}
   board: {fileID: 1369780937}
