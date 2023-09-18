@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 public class LevelSelectionMenu : MonoBehaviour
 {
-    private JsonConfigurationLoader jsonConfigurationLoader = new JsonConfigurationLoader();
+    private IConfigurationLoader configurationLoader = new XMLConfigurationLoader();
     [SerializeField] private string gameConfigFilePath;
     [SerializeField] private GameObject levelMenu;
     private Dictionary<string, Dictionary<string, object>> gameConfiguration;
@@ -20,7 +20,7 @@ public class LevelSelectionMenu : MonoBehaviour
     private void Awake()
     {
         Hide();
-        GameConfigurationHolder.UpdateConfiguration(jsonConfigurationLoader.LoadConfiguration(gameConfigFilePath));
+        GameConfigurationHolder.UpdateConfiguration(configurationLoader.LoadConfiguration(gameConfigFilePath));
         gameConfiguration = GameConfigurationHolder.Configuration;
         InitiateLevelMenu();
     }

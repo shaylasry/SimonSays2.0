@@ -1284,7 +1284,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89c64fc855fbe414589bddd9042d4c6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameConfigFilePath: Assets/Configuration/GameConfiguration.json
+  gameConfigFilePath: Assets/Configuration/GameConfiguration.xml
   levelMenu: {fileID: 1952201392}
   levelButtonPrefab: {fileID: 7528928902984109637, guid: 5754e7d3650d09a458e9b52d091370fd, type: 3}
 --- !u!1 &1952201392

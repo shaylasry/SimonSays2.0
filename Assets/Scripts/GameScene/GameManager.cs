@@ -81,6 +81,8 @@ public class GameManager : MonoBehaviour
     private void InitiateLevelDate()
     {
         Dictionary<string, object> levelConfiguration = LevelConfigurationHolder.Configuration;
+        int a = (int)levelConfiguration[GameConfigurationKeys.NumOfGameButtons];
+        bool b = (bool)levelConfiguration[GameConfigurationKeys.RepeatMode];
         levelData.UpdateLevelData(
             (int)levelConfiguration[GameConfigurationKeys.NumOfGameButtons],
             (int)levelConfiguration[GameConfigurationKeys.PointsPerStep],
