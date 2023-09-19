@@ -23,7 +23,6 @@ public class GameManager : MonoBehaviour
     private List<Button> playSequnce = new List<Button>();
     
     private LevelData levelData = LevelData.Instance;
-    private UserData userData = UserData.Instance;
 
     private int scoring;
     [SerializeField] private TMP_Text scoreText;

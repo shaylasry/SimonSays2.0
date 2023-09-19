@@ -9,7 +9,6 @@ public class UserNameWindow : MonoBehaviour
 {
     public static Action PlayerDidEnterUserName;
 
-    private UserData userData = UserData.Instance;
     [SerializeField] private Button okButton;
     [SerializeField] private TMP_InputField inputFiled;
     
@@ -30,7 +29,7 @@ public class UserNameWindow : MonoBehaviour
 
     private void OnOkButtonClick()
     {
-        userData.userName = inputFiled.text;
+        PlayerPrefs.SetString("UserName", inputFiled.text);
         PlayerDidEnterUserName?.Invoke();
     }
 }

@@ -1,16 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class LevelSelectionMenu : MonoBehaviour
 {
-    private IConfigurationLoader configurationLoader = new XMLConfigurationLoader();
-    [SerializeField] private string gameConfigFilePath;
+    private IConfigurationLoader configurationLoader;
+
+    [SerializeField] private ConfigurationHolder configurationHolder;
+    
     [SerializeField] private GameObject levelMenu;
     private Dictionary<string, Dictionary<string, object>> gameConfiguration;
 
@@ -20,10 +23,39 @@ public class LevelSelectionMenu : MonoBehaviour
     private void Awake()
     {
         Hide();
-        GameConfigurationHolder.UpdateConfiguration(configurationLoader.LoadConfiguration(gameConfigFilePath));
-        gameConfiguration = GameConfigurationHolder.Configuration;
+        LoadConfiguration();
+
         InitiateLevelMenu();
     }
+
+    private void LoadConfiguration()
+    {
+        InitiateConfigurationLoader(configurationHolder.fileExtensionType);
+        GameConfigurationHolder.UpdateConfiguration(configurationLoader.LoadConfiguration(configurationHolder.ConfigurationFileAsset));
+        gameConfiguration = GameConfigurationHolder.Configuration;
+    }
+
+    private void InitiateConfigurationLoader(string fileExtensionType)
+    {
+        if (string.IsNullOrEmpty(fileExtensionType))
+        {
+            throw new ArgumentException("File extension type cannot be empty.");
+        }
+
+        switch (fileExtensionType.ToLower())
+        {
+            case "json":
+                configurationLoader = new JsonConfigurationLoader();
+                break;
+            case "xml":
+                configurationLoader = new XMLConfigurationLoader();
+                break;
+            default:
+                throw new ArgumentException("Unsupported file extension type: " + fileExtensionType);
+        }
+    }
+
+    
 
     // Start is called before the first frame update
     public void Show()

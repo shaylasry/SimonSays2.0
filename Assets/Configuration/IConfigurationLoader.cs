@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 interface IConfigurationLoader
 {
-    public Dictionary<string, Dictionary<string, object>> LoadConfiguration(string filePath);
+    public Dictionary<string, Dictionary<string, object>> LoadConfiguration(TextAsset xmlTextAsset);
 }
