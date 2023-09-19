@@ -42,7 +42,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button buttonPrefab;
     [SerializeField] private Button [] gameButtons;
     
-    private Color[] gameButtonsColors;
+    [SerializeField] private Color[] gameButtonsColors;
+    
     [SerializeField] private AudioClip[] gameButtonsSounds;
     
     [SerializeField] private Sprite buttonSprite;
@@ -83,15 +84,7 @@ public class GameManager : MonoBehaviour
 
     private void GenerateButtonColorsList()
     {
-        gameButtonsColors = new Color[]
-        {
-            Color.red,
-            Color.green,
-            Color.blue,
-            Color.yellow,
-            Color.magenta,
-            Color.cyan
-        };
+        return;
     }
 
     private void InitiateTime()
