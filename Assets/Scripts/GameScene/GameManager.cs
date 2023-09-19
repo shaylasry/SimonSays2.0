@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework.Constraints;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 
 //Documentation
@@ -21,10 +23,13 @@ public class GameManager : MonoBehaviour
 {
     public GameManagerState currentState { get; private set; } = GameManagerState.Idle;
     private List<Button> playSequnce = new List<Button>();
+    public static Action<int> PlayerDidWin;
     
-    private LevelData levelData = LevelData.Instance;
+    private SingleGameConfiguration levelConfiguration = LevelConfigurationHolder.Configuration;
+    
+    // private LevelData levelData = LevelData.Instance;
 
-    private int scoring;
+    private int score;
     [SerializeField] private TMP_Text scoreText;
     private float countdownTime;
     [SerializeField] private TMP_Text countdownText;
@@ -46,7 +51,6 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        InitiateLevelDate();
         GenerateButtonColorsList();
         InitiateBoard();
         InitiateTime();
@@ -77,19 +81,6 @@ public class GameManager : MonoBehaviour
         ChangeState(GameManagerState.SequencePlay);
     }
 
-    private void InitiateLevelDate()
-    {
-        Dictionary<string, object> levelConfiguration = LevelConfigurationHolder.Configuration;
-        int a = (int)levelConfiguration[GameConfigurationKeys.NumOfGameButtons];
-        bool b = (bool)levelConfiguration[GameConfigurationKeys.RepeatMode];
-        levelData.UpdateLevelData(
-            (int)levelConfiguration[GameConfigurationKeys.NumOfGameButtons],
-            (int)levelConfiguration[GameConfigurationKeys.PointsPerStep],
-            (int)levelConfiguration[GameConfigurationKeys.GameTime],
-            (bool)levelConfiguration[GameConfigurationKeys.RepeatMode],
-            (float)levelConfiguration[GameConfigurationKeys.GameSpeed]);
-    }
-    
     private void GenerateButtonColorsList()
     {
         gameButtonsColors = new Color[]
@@ -105,12 +96,12 @@ public class GameManager : MonoBehaviour
 
     private void InitiateTime()
     {
-        countdownTime = levelData.gameTime;
+        countdownTime = levelConfiguration.gameTime;
         countdownText.text = $"Time: {countdownTime}";
     }
     private void InitiateBoard()
     {
-        gameButtons = new Button[levelData.numOfGameButtons];
+        gameButtons = new Button[levelConfiguration.numOfGameButtons];
         for (int i = 0; i < gameButtons.Length; i++)
         {
             Button newButton = Instantiate(buttonPrefab, board.transform);
@@ -168,8 +159,8 @@ public class GameManager : MonoBehaviour
         
         gameButton.GetComponent<Image>().sprite = topButtonSprite;
         gameButton.GetComponent<AudioSource>().Play();
-        scoring += levelData.pointsPerStep;
-        scoreText.text = $"score: {scoring}";
+        score += levelConfiguration.pointsPerStep;
+        scoreText.text = $"score: {score}";
         
         yield return new WaitForSeconds(0.2f);
         gameButton.GetComponent<Image>().sprite = buttonSprite;
@@ -201,12 +192,12 @@ public class GameManager : MonoBehaviour
     private IEnumerator SequencePlayRoutine()
     {
         int startIndex = 0;
-        if (!levelData.repeatMode)
+        if (!levelConfiguration.repeatMode)
         {
             startIndex = playSequnce.Count - 1;
         }
         
-        float delay = baseDelayBetweenLightUp / levelData.gameSpeed;
+        float delay = baseDelayBetweenLightUp / levelConfiguration.gameSpeed;
         
         for (int i = startIndex; i < playSequnce.Count; i++)
         {
@@ -272,6 +263,7 @@ public class GameManager : MonoBehaviour
                 playerCurPlaySequenceListIndex = 0;
                 break;
             case GameManagerState.Win:
+                PlayerDidWin?.Invoke(score);
                 Debug.Log("You Win");
                 break;
             case GameManagerState.Lose:

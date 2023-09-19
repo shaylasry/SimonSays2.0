@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6db4e0b4e360458795b525245ada2e3e, type: 3}
   m_Name: JsonConfigurationHolder
   m_EditorClassIdentifier: 
-  ConfigurationFileAsset: {fileID: 4900000, guid: c5d4b9ee20ec4fa19e92a9466b67b0a9, type: 3}
+  DataSerializationFileAsset: {fileID: 4900000, guid: 81f891adc9984c38b8b55812d5b5f12b, type: 3}
   fileExtensionType: json

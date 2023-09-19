@@ -2,25 +2,18 @@
 
 public class GameConfigurationHolder
 {
-    // Singleton instance
-    private static Dictionary<string, Dictionary<string,object>> configuration;
+    private static GameConfigurations configuration = new GameConfigurations();
     
-    public static Dictionary<string, Dictionary<string,object>> Configuration
+    public static GameConfigurations Configuration
     {
         get
         {
-            if (configuration == null)
-            {
-                configuration = new Dictionary<string, Dictionary<string,object>>();
-            }
             return configuration;
         }
     }
 
-    public static void UpdateConfiguration(Dictionary<string, Dictionary<string,object>> newConfiguration)
+    public static void UpdateConfiguration(GameConfigurations configurations)
     {
-        configuration = newConfiguration;
+        configuration = configurations;
     }
-    
-    private GameConfigurationHolder() {}
 }

@@ -67,4 +67,9 @@ public class XMLConfigurationLoader : IConfigurationLoader
             return null;
         }
     }
+
+    public T LoadConfiguration<T>(string asset)
+    {
+        throw new NotImplementedException();
+    }
 }

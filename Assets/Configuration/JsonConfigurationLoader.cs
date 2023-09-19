@@ -39,4 +39,9 @@ public class JsonConfigurationLoader : IConfigurationLoader
             return null;
         }
     }
+
+    public T LoadConfiguration<T>(string asset)
+    {
+        throw new System.NotImplementedException();
+    }
 }

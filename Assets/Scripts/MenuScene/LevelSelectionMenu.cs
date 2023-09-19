@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -12,10 +13,10 @@ public class LevelSelectionMenu : MonoBehaviour
 {
     private IConfigurationLoader configurationLoader;
 
-    [SerializeField] private ConfigurationHolder configurationHolder;
+    [SerializeField] private DataSerializationHolder gameConfigurationFileHolder;
     
     [SerializeField] private GameObject levelMenu;
-    private Dictionary<string, Dictionary<string, object>> gameConfiguration;
+    private GameConfigurations gameConfiguration;
 
     public static Action PlayerDidPickLevel;
 
@@ -30,8 +31,15 @@ public class LevelSelectionMenu : MonoBehaviour
 
     private void LoadConfiguration()
     {
-        InitiateConfigurationLoader(configurationHolder.fileExtensionType);
-        GameConfigurationHolder.UpdateConfiguration(configurationLoader.LoadConfiguration(configurationHolder.ConfigurationFileAsset));
+        InitiateConfigurationLoader(gameConfigurationFileHolder.fileExtensionType);
+        var textAsset = gameConfigurationFileHolder.DataSerializationFileAsset;
+        GameConfigurations loadedConfiguration =
+            configurationLoader.LoadConfiguration<GameConfigurations>(textAsset.ToString());
+        
+        // OLD CODE:
+        // GameConfigurationHolder.UpdateConfiguration(configurationLoader.LoadConfiguration(textAsset.ToString()));
+        
+        GameConfigurationHolder.UpdateConfiguration(loadedConfiguration);
         gameConfiguration = GameConfigurationHolder.Configuration;
     }
 
@@ -45,7 +53,7 @@ public class LevelSelectionMenu : MonoBehaviour
         switch (fileExtensionType.ToLower())
         {
             case "json":
-                configurationLoader = new JsonConfigurationLoader();
+                configurationLoader = new ImprovedJsonConfigurationLoader<GameConfigurations>();
                 break;
             case "xml":
                 configurationLoader = new XMLConfigurationLoader();
@@ -54,10 +62,7 @@ public class LevelSelectionMenu : MonoBehaviour
                 throw new ArgumentException("Unsupported file extension type: " + fileExtensionType);
         }
     }
-
     
-
-    // Start is called before the first frame update
     public void Show()
     {
         gameObject.SetActive(true);
@@ -70,26 +75,28 @@ public class LevelSelectionMenu : MonoBehaviour
     
     private void InitiateLevelMenu()
     {
-        List<string> keysList = new List<string>(gameConfiguration.Keys);
-        int numOfButtons = keysList.Count;
-        
-        for (int i = 0; i < numOfButtons; i++)
+        foreach (SingleGameConfiguration targetConfig in gameConfiguration.configurations)
         {
             Button newButton = Instantiate(levelButtonPrefab, levelMenu.transform);
             TMP_Text levelButtonText = newButton.GetComponentInChildren<TMP_Text>();
 
             if (levelButtonText != null)
             {
-                levelButtonText.text = keysList[i];
+                levelButtonText.text = targetConfig.title;
             }
             
-            newButton.onClick.AddListener(() => OnLevelButtonClick(levelButtonText));
+            newButton.onClick.AddListener(() => OnLevelButtonClick(targetConfig.id));
         }
     }
 
-    public void OnLevelButtonClick(TMP_Text levelButtonText)
+    public void OnLevelButtonClick(string clickedButtonId)
     {
-        LevelConfigurationHolder.UpdateConfiguration(gameConfiguration[levelButtonText.text]);
+        var configuration = gameConfiguration.configurations;
+        var selectedConfig = configuration.First(config => config.id == clickedButtonId);
+
+        if (selectedConfig.id == "") return;
+        
+        LevelConfigurationHolder.UpdateConfiguration(selectedConfig);
         PlayerDidPickLevel?.Invoke();
     }
 }
