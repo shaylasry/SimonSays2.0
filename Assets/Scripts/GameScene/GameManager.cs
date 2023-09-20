@@ -1,23 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework.Constraints;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using Random = UnityEngine.Random;
-
-
-//Documentation
-// 1. Game Mangaer will define the levelData accroding to Difficulty level 
-// 2. Game manager will keep scoring
-// 3. Game Manger will keep the player Name;
-// 4. Game manager will keep state machine to change states of game - pasue start stop win lose;
-// 5. Game Manager will update score in win stare in table scroe
-// 6. Game Manager will return to start screen for now
-// 7. manage click button with boolean? or maybe disable
-//Set interactable to false and set the alpha for the disabled color to 0, so it will be totally transparent and not visible, even when you hover with the mouse on it.
-// 8. Just use list and compare by index
 
 public class GameManager : MonoBehaviour
 {
@@ -27,14 +13,12 @@ public class GameManager : MonoBehaviour
     
     private SingleGameConfiguration levelConfiguration = LevelConfigurationHolder.Configuration;
     
-    // private LevelData levelData = LevelData.Instance;
-
     private int score;
     [SerializeField] private TMP_Text scoreText;
     private float countdownTime;
     [SerializeField] private TMP_Text countdownText;
     private Coroutine countdownCoroutine;
-    
+    [SerializeField] private EndOfGameWindow endOfGameWindow;
     private int playerCurPlaySequenceListIndex;
     private float baseDelayBetweenLightUp = 0.5f;
     
@@ -47,10 +31,8 @@ public class GameManager : MonoBehaviour
     
     [SerializeField] private AudioClip[] gameButtonsSounds;
 
-    // Start is called before the first frame update
     void Start()
     {
-        GenerateButtonColorsList();
         InitiateBoard();
         InitiateTime();
     }
@@ -68,23 +50,25 @@ public class GameManager : MonoBehaviour
     private void Subscribe()
     {
         PreGameWindow.PlayerDidPressStart += OnPlayerDidPressStart;
+        LeaderBoard.PlayerClosedLeaderBoard += OnPlayerClosedLeaderBoard;
     }
-
+    
     private void Unsubscribe()
     {
         PreGameWindow.PlayerDidPressStart -= OnPlayerDidPressStart;
+        LeaderBoard.PlayerClosedLeaderBoard -= OnPlayerClosedLeaderBoard;
     }
 
     private void OnPlayerDidPressStart()
     {
         ChangeState(GameManagerState.SequencePlay);
     }
-
-    private void GenerateButtonColorsList()
+    private void OnPlayerClosedLeaderBoard()
     {
-        return;
+        endOfGameWindow.message.text = "Well Done!";
+        endOfGameWindow.Show();
     }
-
+    
     private void InitiateTime()
     {
         countdownTime = levelConfiguration.gameTime;
@@ -241,7 +225,8 @@ public class GameManager : MonoBehaviour
                 break;
             case GameManagerState.Lose:
                 StopCoroutine(countdownCoroutine);
-                Debug.Log("You losee");
+                endOfGameWindow.message.text = "Something was missing...";
+                endOfGameWindow.Show();
                 break;
         }
     }

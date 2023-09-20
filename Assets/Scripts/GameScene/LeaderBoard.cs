@@ -4,13 +4,17 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 public class LeaderBoard : MonoBehaviour
 {
+    public static Action PlayerClosedLeaderBoard;
+
     private const string JsonLeaderBoardFileName = "JsonLeaderboardHolder.json";
     [SerializeField] private GameObject scorePanel;
     [SerializeField] private ScoreEntry scoreEntryPrefab;
     private List<ScoreEntry> scoresEntries = new List<ScoreEntry>();
+    [SerializeField] private Button closeButton;
     
     private LeaderboardEntries leaderboardEntries;
     IConfigurationLoader LeaderboardLoader = new JsonConfigurationLoader<LeaderboardEntries>();
@@ -25,9 +29,21 @@ public class LeaderBoard : MonoBehaviour
     {
         Hide();
         LoadJsonLeaderBoard();
+        InitializeCloseButton();
         InitializeTopScoresList();
     }
-    
+
+    private void InitializeCloseButton()
+    {
+        closeButton.onClick.AddListener(OnCloseButtonClick);
+    }
+
+    private void OnCloseButtonClick()
+    {
+        Hide();
+        PlayerClosedLeaderBoard?.Invoke();
+    }
+
     private void OnEnable()
     {
         Subscribe();
