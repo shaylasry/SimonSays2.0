@@ -8,7 +8,7 @@ public class GameButton : MonoBehaviour
     [SerializeField] private Sprite buttonUp;
     [SerializeField] private Sprite buttonPressed;
     public AudioSource buttonSound;
-
+    
     public void ButtonIsPressed()
     {
         buttonComponent.image.sprite = buttonPressed;

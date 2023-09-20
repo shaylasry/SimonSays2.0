@@ -19,6 +19,7 @@ public class MenuManager : MonoBehaviour
         Unsubscribe();   
     }
     
+    //Use c# event so each game object can handle it's own functionality and we can still manage passing between Menu scene states
     private void Subscribe()
     {
         UserNameWindow.PlayerDidEnterUserName += OnPlayerDidEnterUserName;
@@ -81,6 +82,7 @@ public class MenuManager : MonoBehaviour
         }
     }
     
+    //Using a state machine to handle the different states in the Menu Scene
     public enum MenuManagerState 
     {
         UserNameInsertion,

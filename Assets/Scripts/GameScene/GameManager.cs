@@ -7,29 +7,33 @@ using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
-    public GameManagerState currentState { get; private set; } = GameManagerState.Idle;
-    private List<GameButton> playSequnce = new List<GameButton>();
-    public static Action<int> PlayerDidWin;
     
+    public GameManagerState currentState { get; private set; } = GameManagerState.Idle;
+    public static Action<int> PlayerDidWin;
+
+    //Level configuration instance
     private SingleGameConfiguration levelConfiguration = LevelConfigurationHolder.Configuration;
     
+    //Game data instances
     private int score;
+    private float baseDelayBetweenLightUp = 0.5f;
     [SerializeField] private TMP_Text scoreText;
     private float countdownTime;
     [SerializeField] private TMP_Text countdownText;
     private Coroutine countdownCoroutine;
     [SerializeField] private EndOfGameWindow endOfGameWindow;
-    private int playerCurPlaySequenceListIndex;
-    private float baseDelayBetweenLightUp = 0.5f;
-    
-    [SerializeField] private GameObject board;
 
+    //Play sequence state instances
+    private int playerCurPlaySequenceListIndex;
+    private List<GameButton> playSequnce = new List<GameButton>();
+    
+    //Game objects instances
+    [SerializeField] private GameObject board;
     [SerializeField] private GameButton gameButtonPrefab;
     [SerializeField] private GameButton [] gameButtons;
-    
     [SerializeField] private Color[] gameButtonsColors;
-    
     [SerializeField] private AudioClip[] gameButtonsSounds;
+    
 
     void Start()
     {
@@ -47,6 +51,7 @@ public class GameManager : MonoBehaviour
         Unsubscribe();   
     }
     
+    //Use c# event so each game object can handle it's own functionality and we can still manage passing between Game scene states
     private void Subscribe()
     {
         PreGameWindow.PlayerDidPressStart += OnPlayerDidPressStart;
@@ -99,12 +104,12 @@ public class GameManager : MonoBehaviour
             countdownText.text = $"Time: {countdownTime}";
             yield return new WaitForSeconds(1.0f);
         }
-        Debug.Log("before change to Win");
         ChangeState(GameManagerState.Win);
     }
     
     private void OnGameButtonClick(GameButton gameButton)
     {
+        //Player can't push button when it's not his turn to play
         if (currentState == GameManagerState.PlayerTurn)
         {
             StartCoroutine(PlayerButtonClickRoutine(gameButton));
@@ -156,6 +161,7 @@ public class GameManager : MonoBehaviour
             startIndex = playSequnce.Count - 1;
         }
         
+        //Calculation of the wait delay time according to the game speed configuration
         float delay = baseDelayBetweenLightUp / levelConfiguration.gameSpeed;
         
         for (int i = startIndex; i < playSequnce.Count; i++)
@@ -222,9 +228,7 @@ public class GameManager : MonoBehaviour
                 playerCurPlaySequenceListIndex = 0;
                 break;
             case GameManagerState.Win:
-                Debug.Log("Beforee Invkoe");
                 PlayerDidWin?.Invoke(score);
-                Debug.Log("AfterInovoke");
                 break;
             case GameManagerState.Lose:
                 StopCoroutine(countdownCoroutine);

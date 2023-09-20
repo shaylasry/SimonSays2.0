@@ -5,23 +5,28 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Leaderboard will always show the top 10 results
 public class LeaderBoard : MonoBehaviour
 {
     public static Action PlayerClosedLeaderBoard;
-
     private const string JsonLeaderBoardFileName = "JsonLeaderboardHolder.json";
-    [SerializeField] private GameObject leaderBoardPanel;
-    [SerializeField] private GameObject scorePanel;
-    [SerializeField] private ScoreEntry scoreEntryPrefab;
-    private List<ScoreEntry> scoresEntries = new List<ScoreEntry>();
-    [SerializeField] private Button closeButton;
     
+    //Write and read to persistence leaderboard instances
     private LeaderboardEntries leaderboardEntries;
     IConfigurationLoader LeaderboardLoader = new JsonConfigurationLoader<LeaderboardEntries>();
     IConfigurationSaver leaderboarsSaver = new JsonConfigurationSaver<LeaderboardEntries>();
     
-    List<int> topScores = new List<int>();
-
+    //Game objects instances
+    [SerializeField] private GameObject leaderBoardPanel;
+    [SerializeField] private GameObject scorePanel;
+    [SerializeField] private ScoreEntry scoreEntryPrefab;
+    [SerializeField] private Button closeButton;
+    
+    //Leaderboard management instance
+    private List<ScoreEntry> scoresEntries = new List<ScoreEntry>();
+    //topScores is used to keep track during the game so we won't update leaderboard if not needed.
+    //When not all leaderboard entries are full we keep -1 value so a player with score 0 will still enter the leaderboard
+    List<int> topScores = new List<int>(); 
     private int winScoreEntryPosition = -1;
     private int numOfEnteries = 10;
 
@@ -69,6 +74,7 @@ public class LeaderBoard : MonoBehaviour
         if (IsScoreValid(playerScore))
         {
             SubmitScore(playerScore);
+            UpdateJsonLeaderBoard();
         }
         Show();
     }
@@ -76,12 +82,13 @@ public class LeaderBoard : MonoBehaviour
     public void Show()
     {
         InitiateLeaderboard();
-        UpdateJsonLeaderBoard();
         leaderBoardPanel.SetActive(true);
     }
     
     public void Hide()
     {
+        /*We hide leaderBoardPanel instead of this game object to insure OnEnable will
+        be called and GameManager.PlayerDidWin subscription*/
         leaderBoardPanel.SetActive(false);
         ResetLeaderBoardForNextGame();
     }
@@ -121,40 +128,42 @@ public class LeaderBoard : MonoBehaviour
         }
     }
     
+    //Instantiate entries only if needed - Win state only
     private void InitiateLeaderboard()
+    {
+        for (int i = 0; i < numOfEnteries; i++)
         {
-            for (int i = 0; i < numOfEnteries; i++)
+            string rank = (i + 1).ToString();;
+            string score = "";
+            string playerName = "";
+            
+            ScoreEntry newEntry = Instantiate(scoreEntryPrefab, scorePanel.transform);
+            
+            if (i < leaderboardEntries.leaderboard.Count)
             {
-                string rank = (i + 1).ToString();;
-                string score = "";
-                string playerName = "";
-                ScoreEntry newEntry = Instantiate(scoreEntryPrefab, scorePanel.transform);
+                SingleLeaderboardEntry curEntry = leaderboardEntries.leaderboard[i];
+                score = curEntry.score.ToString();
+                playerName = curEntry.playerName;
                 
-                if (i < leaderboardEntries.leaderboard.Count)
-                {
-                    SingleLeaderboardEntry curEntry = leaderboardEntries.leaderboard[i];
-                    score = curEntry.score.ToString();
-                    playerName = curEntry.playerName;
-                    
-                    topScores.Add(curEntry.score);
-                }
-                else
-                {
-                    topScores.Add(-1);
-                }
-    
-                if (winScoreEntryPosition == i)
-                {
-                    newEntry.InitEntryWithHighLight(rank, score, playerName);
-                }
-                else
-                {
-                    newEntry.InitEntry(rank, score, playerName);
-                }
-                
-                scoresEntries.Add(newEntry);
+                topScores.Add(curEntry.score);
             }
+            else
+            {
+                topScores.Add(-1);
+            }
+
+            if (winScoreEntryPosition == i)
+            {
+                newEntry.InitEntryWithHighLight(rank, score, playerName);
+            }
+            else
+            {
+                newEntry.InitEntry(rank, score, playerName);
+            }
+            
+            scoresEntries.Add(newEntry);
         }
+    }
     
     private void UpdateJsonLeaderBoard()
     {

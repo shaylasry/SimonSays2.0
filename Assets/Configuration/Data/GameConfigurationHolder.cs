@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-
+﻿
+//Singleton GameConfigurationHolder so we can use the full game configuration from all scenes 
 public class GameConfigurationHolder
 {
     private static GameConfigurations configuration = new GameConfigurations();
