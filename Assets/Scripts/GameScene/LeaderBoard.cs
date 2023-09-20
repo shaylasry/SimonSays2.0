@@ -96,7 +96,9 @@ public class LeaderBoard : MonoBehaviour
     private void LoadJsonLeaderBoard()
     {
         string filePath = Path.Combine(Application.persistentDataPath, JsonLeaderBoardFileName);
-
+        
+        //If we want to reset leader board we can use the code in this if
+        //didn't made this functionality because we want persistence leaderboard
         if (!File.Exists(filePath))
         {
             LeaderboardEntries leaderboardData = new LeaderboardEntries
