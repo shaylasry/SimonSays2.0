@@ -70,14 +70,7 @@ public class MenuManager : MonoBehaviour
         switch (currentState)
         {
             case MenuManagerState.UserNameInsertion:
-                if (PlayerPrefs.GetString(PlayerPrefsKeys.UserName) == "")
-                {
-                    userNameWindow.Show();
-                }
-                else
-                {
-                    ChangeState(MenuManagerState.LevelSelection);
-                }
+                userNameWindow.Show();
                 break;
             case MenuManagerState.LevelSelection:
                 levelSelectionMenu.Show();

@@ -51,12 +51,15 @@ public class GameManager : MonoBehaviour
     {
         PreGameWindow.PlayerDidPressStart += OnPlayerDidPressStart;
         LeaderBoard.PlayerClosedLeaderBoard += OnPlayerClosedLeaderBoard;
+        LeaderBoard20.PlayerClosedLeaderBoard += OnPlayerClosedLeaderBoard;
+
     }
     
     private void Unsubscribe()
     {
         PreGameWindow.PlayerDidPressStart -= OnPlayerDidPressStart;
         LeaderBoard.PlayerClosedLeaderBoard -= OnPlayerClosedLeaderBoard;
+        LeaderBoard20.PlayerClosedLeaderBoard -= OnPlayerClosedLeaderBoard;
     }
 
     private void OnPlayerDidPressStart()
@@ -98,7 +101,7 @@ public class GameManager : MonoBehaviour
             countdownText.text = $"Time: {countdownTime}";
             yield return new WaitForSeconds(1.0f);
         }
-
+        Debug.Log("before change to Win");
         ChangeState(GameManagerState.Win);
     }
     
@@ -221,7 +224,9 @@ public class GameManager : MonoBehaviour
                 playerCurPlaySequenceListIndex = 0;
                 break;
             case GameManagerState.Win:
+                Debug.Log("Beforee Invkoe");
                 PlayerDidWin?.Invoke(score);
+                Debug.Log("AfterInovoke");
                 break;
             case GameManagerState.Lose:
                 StopCoroutine(countdownCoroutine);
