@@ -53,7 +53,7 @@ public class LevelSelectionMenu : MonoBehaviour
                 configurationLoader = new ImprovedJsonConfigurationLoader<GameConfigurations>();
                 break;
             case "xml":
-                configurationLoader = new XMLConfigurationLoader();
+                configurationLoader = new XMLConfigurationLoader<GameConfigurations>();
                 break;
             default:
                 throw new ArgumentException("Unsupported file extension type: " + fileExtensionType);

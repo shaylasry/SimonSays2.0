@@ -1,75 +1,29 @@
-﻿using UnityEngine;
-using System;
-using System.Collections.Generic;
-using System.Xml;
+﻿using System;
+using System.IO;
+using System.Xml.Serialization;
 
-public class XMLConfigurationLoader : IConfigurationLoader
+using System;
+using System.IO;
+using System.Xml.Serialization;
+using UnityEngine;
+
+public class XMLConfigurationLoader<T> : IConfigurationLoader
 {
-    public Dictionary<string, Dictionary<string, object>> LoadConfiguration(TextAsset xmlTextAsset)
+    public T LoadConfiguration<T>(string asset)
     {
         try
         {
-            Dictionary<string, Dictionary<string, object>> configuration = new Dictionary<string, Dictionary<string, object>>();
+            XmlSerializer serializer = new XmlSerializer(typeof(T));
 
-            if (xmlTextAsset != null)
+            using (StringReader reader = new StringReader(asset))
             {
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.LoadXml(xmlTextAsset.text);
-
-                XmlNodeList levelNodes = xmlDoc.SelectNodes("/Configurations/*");
-
-                foreach (XmlNode levelNode in levelNodes)
-                {
-                    Dictionary<string, object> levelConfig = new Dictionary<string, object>();
-
-                    foreach (XmlNode propertyNode in levelNode.ChildNodes)
-                    {
-                        if (propertyNode.NodeType == XmlNodeType.Element)
-                        {
-                            string propertyName = propertyNode.Name;
-
-                            // Attempt to convert propertyValue to int
-                            if (int.TryParse(propertyNode.InnerText, out int intValue))
-                            {
-                                levelConfig[propertyName] = intValue;
-                            }
-                            // Attempt to convert propertyValue to float
-                            else if (float.TryParse(propertyNode.InnerText, out float floatValue))
-                            {
-                                levelConfig[propertyName] = floatValue;
-                            }
-                            // Attempt to convert propertyValue to bool
-                            else if (bool.TryParse(propertyNode.InnerText, out bool boolValue))
-                            {
-                                levelConfig[propertyName] = boolValue;
-                            }
-                            // Otherwise, treat it as a string
-                            else
-                            {
-                                levelConfig[propertyName] = propertyNode.InnerText;
-                            }
-                        }
-                    }
-
-                    configuration[levelNode.Name] = levelConfig;
-                }
+                return (T)serializer.Deserialize(reader);
             }
-            else
-            {
-                Debug.LogError("XML TextAsset is null.");
-            }
-
-            return configuration;
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
-            Debug.LogError($"Error loading configuration: {e.Message}");
-            return null;
+            Debug.LogError("Error loading XML configuration: " + e.Message);
+            return default(T);
         }
-    }
-
-    public T LoadConfiguration<T>(string asset)
-    {
-        throw new NotImplementedException();
     }
 }

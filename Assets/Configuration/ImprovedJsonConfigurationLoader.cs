@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class ImprovedJsonConfigurationLoader<T>: IConfigurationLoader
 {
-    public Dictionary<string, Dictionary<string, object>> LoadConfiguration(TextAsset xmlTextAsset)
-    {
-        throw new System.NotImplementedException();
-    }
-
     public T LoadConfiguration<T>(string asset)
     {
         try

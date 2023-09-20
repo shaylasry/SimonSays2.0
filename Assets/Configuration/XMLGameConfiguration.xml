@@ -1,23 +1,29 @@
-﻿<Configurations>
-    <Easy>
+﻿<configurations>
+    <configuration>
+        <id>easy</id>
+        <title>Easy</title>
         <numOfGameButtons>4</numOfGameButtons>
         <pointsPerStep>1</pointsPerStep>
         <gameTime>50</gameTime>
         <repeatMode>true</repeatMode>
         <gameSpeed>1.0</gameSpeed>
-    </Easy>
-    <Medium>
+    </configuration>
+    <configuration>
+        <id>medium</id>
+        <title>Medium</title>
         <numOfGameButtons>5</numOfGameButtons>
         <pointsPerStep>2</pointsPerStep>
         <gameTime>45</gameTime>
         <repeatMode>true</repeatMode>
         <gameSpeed>1.25</gameSpeed>
-    </Medium>
-    <Hard>
+    </configuration>
+    <configuration>
+        <id>hard</id>
+        <title>Hard</title>
         <numOfGameButtons>6</numOfGameButtons>
         <pointsPerStep>3</pointsPerStep>
         <gameTime>30</gameTime>
         <repeatMode>false</repeatMode>
         <gameSpeed>1.5</gameSpeed>
-    </Hard>
-</Configurations>
+    </configuration>
+</configurations>
