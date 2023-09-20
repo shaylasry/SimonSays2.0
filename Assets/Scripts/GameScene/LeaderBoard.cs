@@ -9,49 +9,97 @@ public class LeaderBoard : MonoBehaviour
     [SerializeField] private GameObject scorePanel;
     [SerializeField] private ScoreEntry scoreEntryPrefab;
     private List<ScoreEntry> scoresEntries = new List<ScoreEntry>();
-    private ScoreEntryData[] leaderboardData;
+    
+    [SerializeField] private DataSerializationHolder leaderboardFileHolder;
+    private LeaderboardEntries leaderboardEntries;
+    IConfigurationLoader LeaderboardLoader = new ImprovedJsonConfigurationLoader<LeaderboardEntries>();
     
     List<int> topScores = new List<int>();
 
-    private int entryPosition = -1;
+    private int winScoreEntryPosition = -1;
     private int numOfEnteries = 10;
 
+    private void InitiateLeaderBoardLoader(string fileExtensionType)
+    {
+        if (string.IsNullOrEmpty(fileExtensionType))
+        {
+            throw new ArgumentException("File extension type cannot be empty.");
+        }
+
+        switch (fileExtensionType.ToLower())
+        {
+            case "json":
+                LeaderboardLoader = new ImprovedJsonConfigurationLoader<LeaderboardEntries>();
+                break;
+            default:
+                throw new ArgumentException("Unsupported file extension type: " + fileExtensionType);
+        }
+    }
+    
     private void Awake()
     {
         Hide();
-        InitiateScoresEntries();
+        LoadJsonLeaderBoard();
+        InititalTopScoresList();
     }
 
-    private void InitiateScoresEntries()
+    private void InititalTopScoresList()
     {
         for (int i = 0; i < numOfEnteries; i++)
         {
-            ScoreEntry newEntry = Instantiate(scoreEntryPrefab, scorePanel.transform);
-            string rank = (i + 1).ToString();
-            newEntry.SetEntry(rank);
-
-            scoresEntries.Add(newEntry);
-            topScores.Add(-1);
+            if (i < leaderboardEntries.leaderboard.Count)
+            {
+                topScores.Add(leaderboardEntries.leaderboard[i].score);
+            }
+            else
+            {
+                topScores.Add(-1);
+            }
         }
     }
-    
-    
-    private void GetJsonLeaderBoard(TextAsset jsonTextAsset)
-    {
-        leaderboardData = new ScoreEntryData[scoresEntries.Count];
-        
-        ScoreEntryData[] tmpLeaderboardData = JsonUtility.FromJson<ScoreEntryData[]>(jsonTextAsset.text);
 
-        for (int i = 0; i < leaderboardData.Length; i++)
+    private void LoadJsonLeaderBoard()
+    {
+        InitiateLeaderBoardLoader(leaderboardFileHolder.fileExtensionType);
+        var textAsset = leaderboardFileHolder.DataSerializationFileAsset;
+        leaderboardEntries = LeaderboardLoader.LoadConfiguration<LeaderboardEntries>(textAsset.ToString());
+    }
+
+    private void InitiateLeaderboard()
+    {
+        for (int i = 0; i < numOfEnteries; i++)
         {
-            if (i >= tmpLeaderboardData.Length)
+            string rank = (i + 1).ToString();;
+            string score = "";
+            string playerName = "";
+            ScoreEntry newEntry = Instantiate(scoreEntryPrefab, scorePanel.transform);
+            
+            if (i < leaderboardEntries.leaderboard.Count)
             {
-                break;
+                SingleLeaderboardEntry curEntry = leaderboardEntries.leaderboard[i];
+                score = curEntry.score.ToString();
+                playerName = curEntry.playerName;
+                
+                topScores.Add(curEntry.score);
+            }
+            else
+            {
+                topScores.Add(-1);
             }
 
-            leaderboardData[i] = tmpLeaderboardData[i];
+            if (winScoreEntryPosition == i)
+            {
+                newEntry.InitEntryWithHighLight(rank, score, playerName);
+            }
+            else
+            {
+                newEntry.InitEntry(rank, score, playerName);
+            }
+            
+            scoresEntries.Add(newEntry);
         }
     }
+    
     
     private void UpdateJsonLeaderBoard()
     {
@@ -80,13 +128,19 @@ public class LeaderBoard : MonoBehaviour
 
     public void Show()
     {
+        InitiateLeaderboard();
         gameObject.SetActive(true);
     }
     
     public void Hide()
     {
         gameObject.SetActive(false);
-        RemoveHighlightScore();
+        ResetLeaderBoardForNextGame();
+    }
+
+    private void ResetLeaderBoardForNextGame()
+    {
+        winScoreEntryPosition = -1;
     }
 
     private void OnPlayerDidWin(int playerScore)
@@ -101,34 +155,28 @@ public class LeaderBoard : MonoBehaviour
     
     private void SubmitScore(int playerScore)
     {
-        for (int i = 0; i < topScores.Count; i++)
+        for (int i = 0; i < numOfEnteries; i++)
         {
             if (playerScore > topScores[i])
             {
+                winScoreEntryPosition = i;
+                
                 topScores.Insert(i,playerScore);
                 topScores.RemoveAt(topScores.Count - 1);
-                
-                entryPosition = i;
-                
-                scoresEntries[entryPosition].UpdateEntryData(playerScore.ToString(), PlayerPrefs.GetString(PlayerPrefsKeys.UserName));
+                SingleLeaderboardEntry newEntry = new SingleLeaderboardEntry(i + 1, playerScore, PlayerPrefsKeys.UserName);
+                                
+                leaderboardEntries.leaderboard.Insert(i, newEntry);
+                if (leaderboardEntries.leaderboard.Count > numOfEnteries)
+                {
+                    leaderboardEntries.leaderboard.RemoveAt(leaderboardEntries.leaderboard.Count - 1);
+                }
                 break;
             }
         }
-        // UpdateJsonLeaderBoard();
     }
-
+    
     private bool IsScoreValid(int playerScore)
     {
         return playerScore > topScores[topScores.Count - 1];
-    }
-    
-    private void RemoveHighlightScore()
-    {
-        if (entryPosition != -1)
-        {
-            scoresEntries[entryPosition].RemoveHighlightScore();
-        }
-
-        entryPosition = -1;
     }
 }

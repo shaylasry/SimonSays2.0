@@ -7,31 +7,17 @@ public class ScoreEntry : MonoBehaviour
     [SerializeField] private TMP_Text score;
     [SerializeField] private TMP_Text playerName;
     
-    private string rankText = "";
-    private string scoreText = "";
-    private string playerNameText = "";
-    public void SetEntry(string initRank)
+    public void InitEntry(string initRank, string intitScore, string initPlayerName)
     {
-        rankText = initRank;
-        rank.text = rankText;
-        score.text = "";
-        playerName.text = "";
+        rank.text = initRank;
+        score.text = intitScore;
+        playerName.text = initPlayerName;
     }
-    
-    public void UpdateEntryData(string newScore, string newPlayerName)
-    {
-        scoreText = newScore;
-        playerNameText = newPlayerName;
 
-        rank.text = $"<color=yellow>{rank.text}</color>";
-        score.text = $"<color=yellow>{scoreText}</color>";
-        playerName.text = $"<color=yellow>{playerNameText}</color>";
-    }
-    
-    public void RemoveHighlightScore()
+    public void InitEntryWithHighLight(string initRank, string intitScore, string initPlayerName)
     {
-        rank.text = rankText;
-        score.text = scoreText;
-        playerName.text = playerNameText;
+        rank.text = $"<color=yellow>{initRank}</color>";
+        score.text = $"<color=yellow>{intitScore}</color>";
+        playerName.text = $"<color=yellow>{initPlayerName}</color>";
     }
 }

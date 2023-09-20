@@ -1843,6 +1843,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scorePanel: {fileID: 273308083}
   scoreEntryPrefab: {fileID: -24207181053789626, guid: 4870aa65f5e67d1498a4659f55e6c7eb, type: 3}
+  leaderboardFileHolder: {fileID: 11400000, guid: 5a970774a709f834db3b8990f955574a, type: 2}
 --- !u!1 &1368298297
 GameObject:
   m_ObjectHideFlags: 0

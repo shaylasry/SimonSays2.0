@@ -35,10 +35,7 @@ public class LevelSelectionMenu : MonoBehaviour
         var textAsset = gameConfigurationFileHolder.DataSerializationFileAsset;
         GameConfigurations loadedConfiguration =
             configurationLoader.LoadConfiguration<GameConfigurations>(textAsset.ToString());
-        
-        // OLD CODE:
-        // GameConfigurationHolder.UpdateConfiguration(configurationLoader.LoadConfiguration(textAsset.ToString()));
-        
+
         GameConfigurationHolder.UpdateConfiguration(loadedConfiguration);
         gameConfiguration = GameConfigurationHolder.Configuration;
     }

@@ -1,3 +1,24 @@
 {
-  "" : -1
+  "leaderboard": [
+    {
+      "rank" : 1,
+      "score" : 60,
+      "playerName" : "David"
+    },
+    {
+      "rank" : 2,
+      "score" : 45,
+      "playerName" : "David"
+    },
+    {
+      "rank" : 3,
+      "score" : 20,
+      "playerName" : "David"
+    },
+    {
+      "rank" : 4,
+      "score" : 10,
+      "playerName" : "David"
+    }
+  ]
 }
