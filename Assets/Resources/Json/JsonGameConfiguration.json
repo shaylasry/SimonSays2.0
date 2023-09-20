@@ -23,7 +23,7 @@
       "title": "Hard",
       "numOfGameButtons": 6,
       "pointsPerStep": 3,
-      "gameTime": 2,
+      "gameTime": 30,
       "repeatMode": false,
       "gameSpeed": 1.5
     }

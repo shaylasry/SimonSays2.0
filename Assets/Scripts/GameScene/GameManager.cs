@@ -51,7 +51,6 @@ public class GameManager : MonoBehaviour
     {
         PreGameWindow.PlayerDidPressStart += OnPlayerDidPressStart;
         LeaderBoard.PlayerClosedLeaderBoard += OnPlayerClosedLeaderBoard;
-        LeaderBoard20.PlayerClosedLeaderBoard += OnPlayerClosedLeaderBoard;
 
     }
     
@@ -59,7 +58,6 @@ public class GameManager : MonoBehaviour
     {
         PreGameWindow.PlayerDidPressStart -= OnPlayerDidPressStart;
         LeaderBoard.PlayerClosedLeaderBoard -= OnPlayerClosedLeaderBoard;
-        LeaderBoard20.PlayerClosedLeaderBoard -= OnPlayerClosedLeaderBoard;
     }
 
     private void OnPlayerDidPressStart()

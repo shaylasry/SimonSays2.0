@@ -15,11 +15,6 @@ public class UserNameWindow : MonoBehaviour
     private void Start()
     {
         okButton.onClick.AddListener(OnOkButtonClick);
-        if (PlayerPrefs.GetInt(PlayerPrefsKeys.IsUserNameSaved) == 1)
-        {
-            Hide();
-            PlayerDidEnterUserName?.Invoke();
-        }
     }
 
     public void Show()
@@ -35,7 +30,6 @@ public class UserNameWindow : MonoBehaviour
     private void OnOkButtonClick()
     {
         PlayerPrefs.SetString(PlayerPrefsKeys.UserName, inputFiled.text);
-        PlayerPrefs.SetInt(PlayerPrefsKeys.IsUserNameSaved, 1);
         PlayerDidEnterUserName?.Invoke();
     }
 }

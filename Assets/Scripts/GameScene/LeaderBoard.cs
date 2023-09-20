@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class LeaderBoard : MonoBehaviour
@@ -11,6 +10,7 @@ public class LeaderBoard : MonoBehaviour
     public static Action PlayerClosedLeaderBoard;
 
     private const string JsonLeaderBoardFileName = "JsonLeaderboardHolder.json";
+    [SerializeField] private GameObject leaderBoardPanel;
     [SerializeField] private GameObject scorePanel;
     [SerializeField] private ScoreEntry scoreEntryPrefab;
     private List<ScoreEntry> scoresEntries = new List<ScoreEntry>();
@@ -27,14 +27,10 @@ public class LeaderBoard : MonoBehaviour
 
     private void Awake()
     {
+        Hide();
         LoadJsonLeaderBoard();
         InitializeCloseButton();
         InitializeTopScoresList();
-    }
-
-    private void Start()
-    {
-        Hide();
     }
 
     private void InitializeCloseButton()
@@ -70,28 +66,26 @@ public class LeaderBoard : MonoBehaviour
     
     private void OnPlayerDidWin(int playerScore)
     {
-        Debug.Log("Before if");
         if (IsScoreValid(playerScore))
         {
             SubmitScore(playerScore);
         }
-        Debug.Log("Beforee Show");
         Show();
     }
-
+    
     public void Show()
     {
         InitiateLeaderboard();
         UpdateJsonLeaderBoard();
-        gameObject.SetActive(true);
+        leaderBoardPanel.SetActive(true);
     }
     
     public void Hide()
     {
-        gameObject.SetActive(false);
+        leaderBoardPanel.SetActive(false);
         ResetLeaderBoardForNextGame();
     }
-
+    
     private void LoadJsonLeaderBoard()
     {
         string filePath = Path.Combine(Application.persistentDataPath, JsonLeaderBoardFileName);
@@ -111,8 +105,7 @@ public class LeaderBoard : MonoBehaviour
         string jsonDataToRead = File.ReadAllText(filePath);
         leaderboardEntries = LeaderboardLoader.LoadConfiguration<LeaderboardEntries>(jsonDataToRead);
     }
-
-
+    
     private void InitializeTopScoresList()
     {
         for (int i = 0; i < numOfEnteries; i++)
@@ -127,41 +120,41 @@ public class LeaderBoard : MonoBehaviour
             }
         }
     }
-
+    
     private void InitiateLeaderboard()
-    {
-        for (int i = 0; i < numOfEnteries; i++)
         {
-            string rank = (i + 1).ToString();;
-            string score = "";
-            string playerName = "";
-            ScoreEntry newEntry = Instantiate(scoreEntryPrefab, scorePanel.transform);
-            
-            if (i < leaderboardEntries.leaderboard.Count)
+            for (int i = 0; i < numOfEnteries; i++)
             {
-                SingleLeaderboardEntry curEntry = leaderboardEntries.leaderboard[i];
-                score = curEntry.score.ToString();
-                playerName = curEntry.playerName;
+                string rank = (i + 1).ToString();;
+                string score = "";
+                string playerName = "";
+                ScoreEntry newEntry = Instantiate(scoreEntryPrefab, scorePanel.transform);
                 
-                topScores.Add(curEntry.score);
+                if (i < leaderboardEntries.leaderboard.Count)
+                {
+                    SingleLeaderboardEntry curEntry = leaderboardEntries.leaderboard[i];
+                    score = curEntry.score.ToString();
+                    playerName = curEntry.playerName;
+                    
+                    topScores.Add(curEntry.score);
+                }
+                else
+                {
+                    topScores.Add(-1);
+                }
+    
+                if (winScoreEntryPosition == i)
+                {
+                    newEntry.InitEntryWithHighLight(rank, score, playerName);
+                }
+                else
+                {
+                    newEntry.InitEntry(rank, score, playerName);
+                }
+                
+                scoresEntries.Add(newEntry);
             }
-            else
-            {
-                topScores.Add(-1);
-            }
-
-            if (winScoreEntryPosition == i)
-            {
-                newEntry.InitEntryWithHighLight(rank, score, playerName);
-            }
-            else
-            {
-                newEntry.InitEntry(rank, score, playerName);
-            }
-            
-            scoresEntries.Add(newEntry);
         }
-    }
     
     private void UpdateJsonLeaderBoard()
     {
@@ -172,7 +165,7 @@ public class LeaderBoard : MonoBehaviour
     {
         winScoreEntryPosition = -1;
     }
-
+    
     private void SubmitScore(int playerScore)
     {
         for (int i = 0; i < numOfEnteries; i++)
