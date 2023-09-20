@@ -1,47 +1,58 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class LeaderBoard : MonoBehaviour
 {
+    private const string JsonLeaderBoardFileName = "JsonLeaderboardHolder.json";
     [SerializeField] private GameObject scorePanel;
     [SerializeField] private ScoreEntry scoreEntryPrefab;
     private List<ScoreEntry> scoresEntries = new List<ScoreEntry>();
     
-    [SerializeField] private DataSerializationHolder leaderboardFileHolder;
     private LeaderboardEntries leaderboardEntries;
     IConfigurationLoader LeaderboardLoader = new ImprovedJsonConfigurationLoader<LeaderboardEntries>();
+    IConfigurationSaver leaderboarsSaver = new JsonConfigurationSaver<LeaderboardEntries>();
     
     List<int> topScores = new List<int>();
 
     private int winScoreEntryPosition = -1;
     private int numOfEnteries = 10;
 
-    private void InitiateLeaderBoardLoader(string fileExtensionType)
-    {
-        if (string.IsNullOrEmpty(fileExtensionType))
-        {
-            throw new ArgumentException("File extension type cannot be empty.");
-        }
-
-        switch (fileExtensionType.ToLower())
-        {
-            case "json":
-                LeaderboardLoader = new ImprovedJsonConfigurationLoader<LeaderboardEntries>();
-                break;
-            default:
-                throw new ArgumentException("Unsupported file extension type: " + fileExtensionType);
-        }
-    }
-    
     private void Awake()
     {
         Hide();
         LoadJsonLeaderBoard();
         InititalTopScoresList();
     }
+
+    private void LoadJsonLeaderBoard()
+    {
+        string filePath = Path.Combine(Application.persistentDataPath, JsonLeaderBoardFileName);
+
+        if (!File.Exists(filePath))
+        {
+            Debug.Log("file path nottttt sxist");
+            LeaderboardEntries leaderboardData = new LeaderboardEntries
+            {
+                leaderboard = new List<SingleLeaderboardEntry>()
+            };
+
+            string jsonDataToWrite = JsonUtility.ToJson(leaderboardData);
+            
+            File.WriteAllText(filePath, jsonDataToWrite);
+        }
+        else
+        {
+            Debug.Log("filePath Exist");
+        }
+        
+        string jsonDataToRead = File.ReadAllText(filePath);
+        leaderboardEntries = LeaderboardLoader.LoadConfiguration<LeaderboardEntries>(jsonDataToRead);
+    }
+
 
     private void InititalTopScoresList()
     {
@@ -56,13 +67,6 @@ public class LeaderBoard : MonoBehaviour
                 topScores.Add(-1);
             }
         }
-    }
-
-    private void LoadJsonLeaderBoard()
-    {
-        InitiateLeaderBoardLoader(leaderboardFileHolder.fileExtensionType);
-        var textAsset = leaderboardFileHolder.DataSerializationFileAsset;
-        leaderboardEntries = LeaderboardLoader.LoadConfiguration<LeaderboardEntries>(textAsset.ToString());
     }
 
     private void InitiateLeaderboard()
@@ -103,7 +107,7 @@ public class LeaderBoard : MonoBehaviour
     
     private void UpdateJsonLeaderBoard()
     {
-        
+        leaderboarsSaver.SaveConfiguration(JsonLeaderBoardFileName, leaderboardEntries);
     }
 
     private void OnEnable()
@@ -129,6 +133,7 @@ public class LeaderBoard : MonoBehaviour
     public void Show()
     {
         InitiateLeaderboard();
+        UpdateJsonLeaderBoard();
         gameObject.SetActive(true);
     }
     
@@ -163,7 +168,8 @@ public class LeaderBoard : MonoBehaviour
                 
                 topScores.Insert(i,playerScore);
                 topScores.RemoveAt(topScores.Count - 1);
-                SingleLeaderboardEntry newEntry = new SingleLeaderboardEntry(i + 1, playerScore, PlayerPrefsKeys.UserName);
+                SingleLeaderboardEntry newEntry = 
+                    new SingleLeaderboardEntry(playerScore, PlayerPrefs.GetString(PlayerPrefsKeys.UserName));
                                 
                 leaderboardEntries.leaderboard.Insert(i, newEntry);
                 if (leaderboardEntries.leaderboard.Count > numOfEnteries)
