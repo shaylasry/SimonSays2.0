@@ -420,7 +420,7 @@ MonoBehaviour:
   scoreText: {fileID: 114991146}
   countdownText: {fileID: 568405168}
   board: {fileID: 1369780937}
-  buttonPrefab: {fileID: 4034537017012000642, guid: 4b8d37d56e6b2d64286a669624ad3ff2, type: 3}
+  gameButtonPrefab: {fileID: 5496873977166143677, guid: 4b8d37d56e6b2d64286a669624ad3ff2, type: 3}
   gameButtons: []
   gameButtonsColors:
   - {r: 1, g: 0, b: 0.4392157, a: 1}
@@ -436,8 +436,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: ad90fea341452440c8e730a2cd8fa6c9, type: 3}
   - {fileID: 8300000, guid: a78b52f49b045427099e648585ee4b06, type: 3}
   - {fileID: 8300000, guid: 65ce83a911bc548ba820270019172b55, type: 3}
-  buttonSprite: {fileID: 1706731217923313833, guid: e980aa9411d40ea4d8a710c404a1f383, type: 3}
-  topButtonSprite: {fileID: 8371362285786240412, guid: 34a20d22a7e1aed469e221ca3331f7af, type: 3}
 --- !u!4 &150662799
 Transform:
   m_ObjectHideFlags: 0
@@ -1843,7 +1841,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scorePanel: {fileID: 273308083}
   scoreEntryPrefab: {fileID: -24207181053789626, guid: 4870aa65f5e67d1498a4659f55e6c7eb, type: 3}
-  leaderboardFileHolder: {fileID: 11400000, guid: 5a970774a709f834db3b8990f955574a, type: 2}
 --- !u!1 &1368298297
 GameObject:
   m_ObjectHideFlags: 0

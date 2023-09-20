@@ -25,7 +25,50 @@ public class LeaderBoard : MonoBehaviour
     {
         Hide();
         LoadJsonLeaderBoard();
-        InititalTopScoresList();
+        InitializeTopScoresList();
+    }
+    
+    private void OnEnable()
+    {
+        Subscribe();
+    }
+
+    private void OnDisable()
+    {
+        Unsubscribe();   
+    }
+    
+    private void Subscribe()
+    {
+        GameManager.PlayerDidWin += OnPlayerDidWin;
+    }
+
+    private void Unsubscribe()
+    {
+        GameManager.PlayerDidWin += OnPlayerDidWin;
+    }
+    
+    private void OnPlayerDidWin(int playerScore)
+    {
+        if (IsScoreValid(playerScore))
+        {
+            SubmitScore(playerScore);
+        }
+        
+        Show();
+    }
+
+    public void Show()
+    {
+        InitiateLeaderboard();
+        UpdateJsonLeaderBoard();
+        gameObject.SetActive(true);
+    }
+    
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+        ResetLeaderBoardForNextGame();
     }
 
     private void LoadJsonLeaderBoard()
@@ -34,7 +77,6 @@ public class LeaderBoard : MonoBehaviour
 
         if (!File.Exists(filePath))
         {
-            Debug.Log("file path nottttt sxist");
             LeaderboardEntries leaderboardData = new LeaderboardEntries
             {
                 leaderboard = new List<SingleLeaderboardEntry>()
@@ -44,17 +86,13 @@ public class LeaderBoard : MonoBehaviour
             
             File.WriteAllText(filePath, jsonDataToWrite);
         }
-        else
-        {
-            Debug.Log("filePath Exist");
-        }
-        
+
         string jsonDataToRead = File.ReadAllText(filePath);
         leaderboardEntries = LeaderboardLoader.LoadConfiguration<LeaderboardEntries>(jsonDataToRead);
     }
 
 
-    private void InititalTopScoresList()
+    private void InitializeTopScoresList()
     {
         for (int i = 0; i < numOfEnteries; i++)
         {
@@ -104,60 +142,16 @@ public class LeaderBoard : MonoBehaviour
         }
     }
     
-    
     private void UpdateJsonLeaderBoard()
     {
         leaderboarsSaver.SaveConfiguration(JsonLeaderBoardFileName, leaderboardEntries);
     }
-
-    private void OnEnable()
-    {
-        Subscribe();
-    }
-
-    private void OnDisable()
-    {
-        Unsubscribe();   
-    }
     
-    private void Subscribe()
-    {
-        GameManager.PlayerDidWin += OnPlayerDidWin;
-    }
-
-    private void Unsubscribe()
-    {
-        GameManager.PlayerDidWin += OnPlayerDidWin;
-    }
-
-    public void Show()
-    {
-        InitiateLeaderboard();
-        UpdateJsonLeaderBoard();
-        gameObject.SetActive(true);
-    }
-    
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-        ResetLeaderBoardForNextGame();
-    }
-
     private void ResetLeaderBoardForNextGame()
     {
         winScoreEntryPosition = -1;
     }
 
-    private void OnPlayerDidWin(int playerScore)
-    {
-        if (IsScoreValid(playerScore))
-        {
-            SubmitScore(playerScore);
-        }
-        
-        Show();
-    }
-    
     private void SubmitScore(int playerScore)
     {
         for (int i = 0; i < numOfEnteries; i++)

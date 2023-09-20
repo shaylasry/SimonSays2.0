@@ -22,7 +22,7 @@ using Random = UnityEngine.Random;
 public class GameManager : MonoBehaviour
 {
     public GameManagerState currentState { get; private set; } = GameManagerState.Idle;
-    private List<Button> playSequnce = new List<Button>();
+    private List<GameButton> playSequnce = new List<GameButton>();
     public static Action<int> PlayerDidWin;
     
     private SingleGameConfiguration levelConfiguration = LevelConfigurationHolder.Configuration;
@@ -39,16 +39,14 @@ public class GameManager : MonoBehaviour
     private float baseDelayBetweenLightUp = 0.5f;
     
     [SerializeField] private GameObject board;
-    [SerializeField] private Button buttonPrefab;
-    [SerializeField] private Button [] gameButtons;
+
+    [SerializeField] private GameButton gameButtonPrefab;
+    [SerializeField] private GameButton [] gameButtons;
     
     [SerializeField] private Color[] gameButtonsColors;
     
     [SerializeField] private AudioClip[] gameButtonsSounds;
-    
-    [SerializeField] private Sprite buttonSprite;
-    [SerializeField] private Sprite topButtonSprite;
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -94,35 +92,17 @@ public class GameManager : MonoBehaviour
     }
     private void InitiateBoard()
     {
-        gameButtons = new Button[levelConfiguration.numOfGameButtons];
+        gameButtons = new GameButton[levelConfiguration.numOfGameButtons];
+
         for (int i = 0; i < gameButtons.Length; i++)
         {
-            Button newButton = Instantiate(buttonPrefab, board.transform);
+            GameButton newGameButton = Instantiate(gameButtonPrefab, board.transform);
             
-            //decide if we shuold throw exception
-            Image buttonImage = newButton.GetComponent<Image>();
-            if (buttonImage != null)
-            {
-                buttonImage.color = gameButtonsColors[i];
-            }
-            else
-            {
-                Debug.LogError("Image component not found on newButton");
-            }
+            newGameButton.buttonComponent.onClick.AddListener(() => OnGameButtonClick(newGameButton));
+            newGameButton.buttonComponent.image.color = gameButtonsColors[i];
+            newGameButton.buttonSound.clip = gameButtonsSounds[i];
 
-            AudioSource buttonSound = newButton.GetComponent<AudioSource>();
-            if (buttonSound != null)
-            {
-                buttonSound.clip = gameButtonsSounds[i];
-            }
-            else
-            {
-                Debug.LogError("AudioSource component not found on newButton");
-            }
-
-            
-            newButton.onClick.AddListener(() => OnGameButtonClick(newButton));
-            gameButtons[i] = newButton;
+            gameButtons[i] = newGameButton;
         }
     }
     
@@ -138,7 +118,7 @@ public class GameManager : MonoBehaviour
         ChangeState(GameManagerState.Win);
     }
     
-    private void OnGameButtonClick(Button gameButton)
+    private void OnGameButtonClick(GameButton gameButton)
     {
         if (currentState == GameManagerState.PlayerTurn)
         {
@@ -146,17 +126,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private IEnumerator PlayerButtonClickRoutine(Button gameButton)
+    private IEnumerator PlayerButtonClickRoutine(GameButton gameButton)
     {
         yield return new WaitForSeconds(0.2f);
         
-        gameButton.GetComponent<Image>().sprite = topButtonSprite;
-        gameButton.GetComponent<AudioSource>().Play();
+        gameButton.ButtonIsPressed();
+        gameButton.buttonSound.Play();
+
         score += levelConfiguration.pointsPerStep;
         scoreText.text = $"score: {score}";
         
         yield return new WaitForSeconds(0.2f);
-        gameButton.GetComponent<Image>().sprite = buttonSprite;
+        gameButton.ButtonIsReleased();
         
         //if button not match the game has ended
         if (gameButton != playSequnce[playerCurPlaySequenceListIndex])
@@ -176,7 +157,7 @@ public class GameManager : MonoBehaviour
     private void PlaySequence()
     {
         int randomButtonIndex = Random.Range(0, gameButtons.Length);
-        Button randomButton = gameButtons[randomButtonIndex];
+        GameButton randomButton = gameButtons[randomButtonIndex];
         playSequnce.Add(randomButton);
 
         StartCoroutine(SequencePlayRoutine());
@@ -196,15 +177,15 @@ public class GameManager : MonoBehaviour
         {
             yield return new WaitForSeconds(delay);
             
-            Button gameButton = playSequnce[i];
+            GameButton gameButton = playSequnce[i];
             
             yield return new WaitForSeconds(0.2f);
         
-            gameButton.GetComponent<Image>().sprite = topButtonSprite;
-            gameButton.GetComponent<AudioSource>().Play();
+            gameButton.ButtonIsPressed();
+            gameButton.buttonSound.Play();
 
             yield return new WaitForSeconds(0.2f);
-            gameButton.GetComponent<Image>().sprite = buttonSprite;
+            gameButton.ButtonIsReleased();
         }
         
         ChangeState(GameManagerState.PlayerTurn);
@@ -257,7 +238,6 @@ public class GameManager : MonoBehaviour
                 break;
             case GameManagerState.Win:
                 PlayerDidWin?.Invoke(score);
-                Debug.Log("You Win");
                 break;
             case GameManagerState.Lose:
                 StopCoroutine(countdownCoroutine);
