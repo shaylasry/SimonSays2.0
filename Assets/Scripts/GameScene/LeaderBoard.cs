@@ -13,7 +13,7 @@ public class LeaderBoard : MonoBehaviour
     private List<ScoreEntry> scoresEntries = new List<ScoreEntry>();
     
     private LeaderboardEntries leaderboardEntries;
-    IConfigurationLoader LeaderboardLoader = new ImprovedJsonConfigurationLoader<LeaderboardEntries>();
+    IConfigurationLoader LeaderboardLoader = new JsonConfigurationLoader<LeaderboardEntries>();
     IConfigurationSaver leaderboarsSaver = new JsonConfigurationSaver<LeaderboardEntries>();
     
     List<int> topScores = new List<int>();

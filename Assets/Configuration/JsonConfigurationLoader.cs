@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ImprovedJsonConfigurationLoader<T>: IConfigurationLoader
+public class JsonConfigurationLoader<T>: IConfigurationLoader
 {
     public T LoadConfiguration<T>(string asset)
     {

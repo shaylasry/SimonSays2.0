@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using NUnit.Framework;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -117,7 +116,7 @@ public class TestConfigurationLoader
     public void LoadJsonConfiguration()
     {
         TextAsset jsonGameConfiguration = Resources.Load<TextAsset>("Json/JsonGameConfiguration");
-        IConfigurationLoader configurationLoader = new ImprovedJsonConfigurationLoader<GameConfigurations>();
+        IConfigurationLoader configurationLoader = new JsonConfigurationLoader<GameConfigurations>();
         gameConfigurationFromJson = configurationLoader.LoadConfiguration<GameConfigurations>(jsonGameConfiguration.ToString());
     }
 

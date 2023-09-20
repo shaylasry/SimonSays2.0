@@ -50,7 +50,7 @@ public class LevelSelectionMenu : MonoBehaviour
         switch (fileExtensionType.ToLower())
         {
             case "json":
-                configurationLoader = new ImprovedJsonConfigurationLoader<GameConfigurations>();
+                configurationLoader = new JsonConfigurationLoader<GameConfigurations>();
                 break;
             case "xml":
                 configurationLoader = new XMLConfigurationLoader<GameConfigurations>();
