@@ -35,6 +35,7 @@ public class LevelSelectionMenu : MonoBehaviour
         gameConfiguration = GameConfigurationHolder.Configuration;
     }
 
+    //use fileExtensionType to chose configuration according to the TextAsset extension type
     private void InitiateConfigurationLoader(string fileExtensionType)
     {
         if (string.IsNullOrEmpty(fileExtensionType))
@@ -42,6 +43,7 @@ public class LevelSelectionMenu : MonoBehaviour
             throw new ArgumentException("File extension type cannot be empty.");
         }
 
+        //lower case to avoid typing errors
         switch (fileExtensionType.ToLower())
         {
             case "json":
