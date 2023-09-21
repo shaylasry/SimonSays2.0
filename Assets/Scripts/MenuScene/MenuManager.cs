@@ -1,20 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-
-
-//menu manager documentation:
-// 1. load configuration from file
-// 2. get user name
-// 3. create 2 components -> input and chose screen
-// 4. use state machine to define which part are we in, check if we shuold move from the choose screen or the game manger
-// 5. present all the different choices for level difficulty
-// 6. when player click the difficulty we will upadted Level data scriptabel object
-//****Level Data and player data are scripatble objects so we cna use them for the whole game
-//    and go so game scene -> we can use enum to decide which window to show
 
 public class MenuManager : MonoBehaviour
 {
@@ -32,6 +19,7 @@ public class MenuManager : MonoBehaviour
         Unsubscribe();   
     }
     
+    //Use c# event so each game object can handle it's own functionality and we can still manage passing between Menu scene states
     private void Subscribe()
     {
         UserNameWindow.PlayerDidEnterUserName += OnPlayerDidEnterUserName;
@@ -94,6 +82,7 @@ public class MenuManager : MonoBehaviour
         }
     }
     
+    //Using a state machine to handle the different states in the Menu Scene
     public enum MenuManagerState 
     {
         UserNameInsertion,

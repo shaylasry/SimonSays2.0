@@ -1,53 +1,42 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework.Constraints;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-
-
-//Documentation
-// 1. Game Mangaer will define the levelData accroding to Difficulty level 
-// 2. Game manager will keep scoring
-// 3. Game Manger will keep the player Name;
-// 4. Game manager will keep state machine to change states of game - pasue start stop win lose;
-// 5. Game Manager will update score in win stare in table scroe
-// 6. Game Manager will return to start screen for now
-// 7. manage click button with boolean? or maybe disable
-//Set interactable to false and set the alpha for the disabled color to 0, so it will be totally transparent and not visible, even when you hover with the mouse on it.
-// 8. Just use list and compare by index
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
-    public GameManagerState currentState { get; private set; } = GameManagerState.Idle;
-    private List<Button> playSequnce = new List<Button>();
     
-    private LevelData levelData = LevelData.Instance;
+    public GameManagerState currentState { get; private set; } = GameManagerState.Idle;
+    public static Action<int> PlayerDidWin;
 
-    private int scoring;
+    //Level configuration instance
+    private SingleGameConfiguration levelConfiguration = LevelConfigurationHolder.Configuration;
+    
+    //Game data instances
+    private int score;
+    private float baseDelayBetweenLightUp = 0.5f;
     [SerializeField] private TMP_Text scoreText;
     private float countdownTime;
     [SerializeField] private TMP_Text countdownText;
     private Coroutine countdownCoroutine;
-    
+    [SerializeField] private EndOfGameWindow endOfGameWindow;
+
+    //Play sequence state instances
     private int playerCurPlaySequenceListIndex;
-    private float baseDelayBetweenLightUp = 0.5f;
+    private List<GameButton> playSequnce = new List<GameButton>();
     
+    //Game objects instances
     [SerializeField] private GameObject board;
-    [SerializeField] private Button buttonPrefab;
-    [SerializeField] private Button [] gameButtons;
-    
-    private Color[] gameButtonsColors;
+    [SerializeField] private GameButton gameButtonPrefab;
+    [SerializeField] private GameButton [] gameButtons;
+    [SerializeField] private Color[] gameButtonsColors;
     [SerializeField] private AudioClip[] gameButtonsSounds;
     
-    [SerializeField] private Sprite buttonSprite;
-    [SerializeField] private Sprite topButtonSprite;
-    
-    // Start is called before the first frame update
+
     void Start()
     {
-        InitiateLevelDate();
-        GenerateButtonColorsList();
         InitiateBoard();
         InitiateTime();
     }
@@ -62,83 +51,48 @@ public class GameManager : MonoBehaviour
         Unsubscribe();   
     }
     
+    //Use c# event so each game object can handle it's own functionality and we can still manage passing between Game scene states
     private void Subscribe()
     {
         PreGameWindow.PlayerDidPressStart += OnPlayerDidPressStart;
-    }
+        LeaderBoard.PlayerClosedLeaderBoard += OnPlayerClosedLeaderBoard;
 
+    }
+    
     private void Unsubscribe()
     {
         PreGameWindow.PlayerDidPressStart -= OnPlayerDidPressStart;
+        LeaderBoard.PlayerClosedLeaderBoard -= OnPlayerClosedLeaderBoard;
     }
 
     private void OnPlayerDidPressStart()
     {
         ChangeState(GameManagerState.SequencePlay);
     }
-
-    private void InitiateLevelDate()
+    private void OnPlayerClosedLeaderBoard()
     {
-        Dictionary<string, object> levelConfiguration = LevelConfigurationHolder.Configuration;
-        int a = (int)levelConfiguration[GameConfigurationKeys.NumOfGameButtons];
-        bool b = (bool)levelConfiguration[GameConfigurationKeys.RepeatMode];
-        levelData.UpdateLevelData(
-            (int)levelConfiguration[GameConfigurationKeys.NumOfGameButtons],
-            (int)levelConfiguration[GameConfigurationKeys.PointsPerStep],
-            (int)levelConfiguration[GameConfigurationKeys.GameTime],
-            (bool)levelConfiguration[GameConfigurationKeys.RepeatMode],
-            (float)levelConfiguration[GameConfigurationKeys.GameSpeed]);
+        endOfGameWindow.message.text = "Well Done!";
+        endOfGameWindow.Show();
     }
     
-    private void GenerateButtonColorsList()
-    {
-        gameButtonsColors = new Color[]
-        {
-            Color.red,
-            Color.green,
-            Color.blue,
-            Color.yellow,
-            Color.magenta,
-            Color.cyan
-        };
-    }
-
     private void InitiateTime()
     {
-        countdownTime = levelData.gameTime;
+        countdownTime = levelConfiguration.gameTime;
         countdownText.text = $"Time: {countdownTime}";
     }
     private void InitiateBoard()
     {
-        gameButtons = new Button[levelData.numOfGameButtons];
+        gameButtons = new GameButton[levelConfiguration.numOfGameButtons];
+
         for (int i = 0; i < gameButtons.Length; i++)
         {
-            Button newButton = Instantiate(buttonPrefab, board.transform);
+            GameButton newGameButton = Instantiate(gameButtonPrefab, board.transform);
             
-            //decide if we shuold throw exception
-            Image buttonImage = newButton.GetComponent<Image>();
-            if (buttonImage != null)
-            {
-                buttonImage.color = gameButtonsColors[i];
-            }
-            else
-            {
-                Debug.LogError("Image component not found on newButton");
-            }
+            newGameButton.buttonComponent.onClick.AddListener(() => OnGameButtonClick(newGameButton));
+            newGameButton.buttonComponent.image.color = gameButtonsColors[i];
+            newGameButton.buttonSound.clip = gameButtonsSounds[i];
 
-            AudioSource buttonSound = newButton.GetComponent<AudioSource>();
-            if (buttonSound != null)
-            {
-                buttonSound.clip = gameButtonsSounds[i];
-            }
-            else
-            {
-                Debug.LogError("AudioSource component not found on newButton");
-            }
-
-            
-            newButton.onClick.AddListener(() => OnGameButtonClick(newButton));
-            gameButtons[i] = newButton;
+            gameButtons[i] = newGameButton;
         }
     }
     
@@ -150,29 +104,30 @@ public class GameManager : MonoBehaviour
             countdownText.text = $"Time: {countdownTime}";
             yield return new WaitForSeconds(1.0f);
         }
-
         ChangeState(GameManagerState.Win);
     }
     
-    private void OnGameButtonClick(Button gameButton)
+    private void OnGameButtonClick(GameButton gameButton)
     {
+        //Player can't push button when it's not his turn to play
         if (currentState == GameManagerState.PlayerTurn)
         {
             StartCoroutine(PlayerButtonClickRoutine(gameButton));
         }
     }
 
-    private IEnumerator PlayerButtonClickRoutine(Button gameButton)
+    private IEnumerator PlayerButtonClickRoutine(GameButton gameButton)
     {
         yield return new WaitForSeconds(0.2f);
         
-        gameButton.GetComponent<Image>().sprite = topButtonSprite;
-        gameButton.GetComponent<AudioSource>().Play();
-        scoring += levelData.pointsPerStep;
-        scoreText.text = $"score: {scoring}";
+        gameButton.ButtonIsPressed();
+        gameButton.buttonSound.Play();
+
+        score += levelConfiguration.pointsPerStep;
+        scoreText.text = $"score: {score}";
         
         yield return new WaitForSeconds(0.2f);
-        gameButton.GetComponent<Image>().sprite = buttonSprite;
+        gameButton.ButtonIsReleased();
         
         //if button not match the game has ended
         if (gameButton != playSequnce[playerCurPlaySequenceListIndex])
@@ -192,7 +147,7 @@ public class GameManager : MonoBehaviour
     private void PlaySequence()
     {
         int randomButtonIndex = Random.Range(0, gameButtons.Length);
-        Button randomButton = gameButtons[randomButtonIndex];
+        GameButton randomButton = gameButtons[randomButtonIndex];
         playSequnce.Add(randomButton);
 
         StartCoroutine(SequencePlayRoutine());
@@ -201,26 +156,27 @@ public class GameManager : MonoBehaviour
     private IEnumerator SequencePlayRoutine()
     {
         int startIndex = 0;
-        if (!levelData.repeatMode)
+        if (!levelConfiguration.repeatMode)
         {
             startIndex = playSequnce.Count - 1;
         }
         
-        float delay = baseDelayBetweenLightUp / levelData.gameSpeed;
+        //Calculation of the wait delay time according to the game speed configuration
+        float delay = baseDelayBetweenLightUp / levelConfiguration.gameSpeed;
         
         for (int i = startIndex; i < playSequnce.Count; i++)
         {
             yield return new WaitForSeconds(delay);
             
-            Button gameButton = playSequnce[i];
+            GameButton gameButton = playSequnce[i];
             
             yield return new WaitForSeconds(0.2f);
         
-            gameButton.GetComponent<Image>().sprite = topButtonSprite;
-            gameButton.GetComponent<AudioSource>().Play();
+            gameButton.ButtonIsPressed();
+            gameButton.buttonSound.Play();
 
             yield return new WaitForSeconds(0.2f);
-            gameButton.GetComponent<Image>().sprite = buttonSprite;
+            gameButton.ButtonIsReleased();
         }
         
         ChangeState(GameManagerState.PlayerTurn);
@@ -272,11 +228,12 @@ public class GameManager : MonoBehaviour
                 playerCurPlaySequenceListIndex = 0;
                 break;
             case GameManagerState.Win:
-                Debug.Log("You Win");
+                PlayerDidWin?.Invoke(score);
                 break;
             case GameManagerState.Lose:
                 StopCoroutine(countdownCoroutine);
-                Debug.Log("You losee");
+                endOfGameWindow.message.text = "Something was missing...";
+                endOfGameWindow.Show();
                 break;
         }
     }

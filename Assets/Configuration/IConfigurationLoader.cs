@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-interface IConfigurationLoader
+public interface IConfigurationLoader
 {
-    public Dictionary<string, Dictionary<string, object>> LoadConfiguration(TextAsset xmlTextAsset);
+    //Using Generic type so we can you this interface anytime we want to load from a TextAsset.text
+    public T LoadConfiguration<T>(string asset);
 }

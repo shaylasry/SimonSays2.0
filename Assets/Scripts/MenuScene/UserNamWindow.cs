@@ -29,7 +29,7 @@ public class UserNameWindow : MonoBehaviour
 
     private void OnOkButtonClick()
     {
-        PlayerPrefs.SetString("UserName", inputFiled.text);
+        PlayerPrefs.SetString(PlayerPrefsKeys.UserName, inputFiled.text);
         PlayerDidEnterUserName?.Invoke();
     }
 }

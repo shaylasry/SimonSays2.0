@@ -10,7 +10,6 @@ public class PreGameWindow : MonoBehaviour
     public static Action PlayerDidPressStart;
     [SerializeField] private Button startButton;
 
-    // Start is called before the first frame update
     void Start()
     {
         startButton.onClick.AddListener(OnButtonClick);
