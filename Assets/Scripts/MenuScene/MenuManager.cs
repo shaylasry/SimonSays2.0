@@ -33,6 +33,10 @@ public class MenuManager : MonoBehaviour
 
     public void OnPlayerDidEnterUserName()
     {
+        if (PlayerPrefs.GetString(PlayerPrefsKeys.UserName) == "")
+        {
+            return;
+        }
         ChangeState(MenuManagerState.LevelSelection);
     }
 

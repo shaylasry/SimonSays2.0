@@ -17,7 +17,7 @@ public class XMLConfigurationLoader : IConfigurationLoader
         }
         catch (Exception e)
         {
-            throw e;
+            throw new Exception("Error loading XML configuration: " + e.Message);
         }
     }
 }

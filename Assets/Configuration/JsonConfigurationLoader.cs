@@ -13,7 +13,7 @@ public class JsonConfigurationLoader: IConfigurationLoader
         }
         catch (Exception e)
         {
-            throw e;
+            throw new Exception("Error loading Json configuration: " + e.Message);
         }
     }
 }

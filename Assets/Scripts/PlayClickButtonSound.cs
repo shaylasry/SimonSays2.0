@@ -1,14 +1,16 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayClickButtonSound : MonoBehaviour
 {
-        [SerializeField] private AudioSource onButtonClickAudioSource;
+        [SerializeField] private AudioClip onButtonClickClip;
         
         public void PlayClickSound()
         {
-                Debug.Log(onButtonClickAudioSource.clip.name);
-                onButtonClickAudioSource.Play();
-                Debug.Log("we need to playyyy");
+                if (Camera.main == null) throw new NullReferenceException("Main camera not found. Sound cannot be played.");
+                
+                //use camera to find the listener position so the sound won't effect by distance
+                Vector3 listenerPosition = Camera.main.transform.position;
+                AudioSource.PlayClipAtPoint(onButtonClickClip, listenerPosition);
         }
-        
 }
