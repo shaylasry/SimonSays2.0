@@ -1,13 +1,21 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
 
-public class JsonConfigurationSaver<T> : IConfigurationSaver
+public class JsonConfigurationSaver : IConfigurationSaver
 {
     public void SaveConfiguration<T>(string fileName,  T data)
     {
         string jsonData = JsonUtility.ToJson(data);
         string path = Path.Combine(Application.persistentDataPath, fileName);
-
-        File.WriteAllText(path, jsonData);
+        try
+        {
+            File.WriteAllText(path, jsonData);
+        }
+        catch (Exception e)
+        {
+            throw e;
+        }
+        
     }
 }

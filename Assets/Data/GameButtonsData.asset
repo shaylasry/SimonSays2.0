@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a2dc46db3a46388bcef86dc0eb80cd, type: 3}
+  m_Name: GameButtonsData
+  m_EditorClassIdentifier: 
+  gameButtonsColors:
+  - {r: 1, g: 0, b: 0.4392157, a: 1}
+  - {r: 1, g: 0.74509805, b: 0, a: 1}
+  - {r: 0, g: 1, b: 0.58431375, a: 1}
+  - {r: 0, g: 0.6745098, b: 1, a: 1}
+  - {r: 0.64705884, g: 0, b: 1, a: 1}
+  - {r: 1, g: 0.44313726, b: 0, a: 1}
+  gameButtonsSounds:
+  - {fileID: 8300000, guid: 84949ccbe2c884d05b79138199c9df29, type: 3}
+  - {fileID: 8300000, guid: ee423f88a0b5b440abed9e47310304b4, type: 3}
+  - {fileID: 8300000, guid: 3839948ccab1245b19ba28f82adee854, type: 3}
+  - {fileID: 8300000, guid: ad90fea341452440c8e730a2cd8fa6c9, type: 3}
+  - {fileID: 8300000, guid: a78b52f49b045427099e648585ee4b06, type: 3}
+  - {fileID: 8300000, guid: 65ce83a911bc548ba820270019172b55, type: 3}
+  wrongGameButtonSound: {fileID: 8300000, guid: 99001d6f0f253fd40b0c768f86436b29, type: 3}

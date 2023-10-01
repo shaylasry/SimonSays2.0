@@ -13,8 +13,8 @@ public class LeaderBoard : MonoBehaviour
     
     //Write and read to persistence leaderboard instances
     private LeaderboardEntries leaderboardEntries;
-    IConfigurationLoader LeaderboardLoader = new JsonConfigurationLoader<LeaderboardEntries>();
-    IConfigurationSaver leaderboarsSaver = new JsonConfigurationSaver<LeaderboardEntries>();
+    IConfigurationLoader LeaderboardLoader = new JsonConfigurationLoader();
+    IConfigurationSaver leaderboarsSaver = new JsonConfigurationSaver();
     
     //Game objects instances
     [SerializeField] private GameObject leaderBoardPanel;
@@ -24,9 +24,8 @@ public class LeaderBoard : MonoBehaviour
     
     //Leaderboard management instance
     private List<ScoreEntry> scoresEntries = new List<ScoreEntry>();
-    //topScores is used to keep track during the game so we won't update leaderboard if not needed.
-    //When not all leaderboard entries are full we keep -1 value so a player with score 0 will still enter the leaderboard
-    List<int> topScores = new List<int>(); 
+
+    //keep the winner poistion in leader board for the score highlight
     private int winScoreEntryPosition = -1;
     private int numOfEnteries = 10;
 
@@ -35,7 +34,6 @@ public class LeaderBoard : MonoBehaviour
         Hide();
         LoadJsonLeaderBoard();
         InitializeCloseButton();
-        InitializeTopScoresList();
     }
 
     private void InitializeCloseButton()
@@ -45,6 +43,7 @@ public class LeaderBoard : MonoBehaviour
 
     private void OnCloseButtonClick()
     {
+        // AudioManager.Instance.PlayMenuButtonSound();
         Hide();
         PlayerClosedLeaderBoard?.Invoke();
     }
@@ -114,22 +113,7 @@ public class LeaderBoard : MonoBehaviour
         string jsonDataToRead = File.ReadAllText(filePath);
         leaderboardEntries = LeaderboardLoader.LoadConfiguration<LeaderboardEntries>(jsonDataToRead);
     }
-    
-    private void InitializeTopScoresList()
-    {
-        for (int i = 0; i < numOfEnteries; i++)
-        {
-            if (i < leaderboardEntries.leaderboard.Count)
-            {
-                topScores.Add(leaderboardEntries.leaderboard[i].score);
-            }
-            else
-            {
-                topScores.Add(-1);
-            }
-        }
-    }
-    
+
     //Instantiate entries only if needed - Win state only
     private void InitiateLeaderboard()
     {
@@ -146,12 +130,6 @@ public class LeaderBoard : MonoBehaviour
                 SingleLeaderboardEntry curEntry = leaderboardEntries.leaderboard[i];
                 score = curEntry.score.ToString();
                 playerName = curEntry.playerName;
-                
-                topScores.Add(curEntry.score);
-            }
-            else
-            {
-                topScores.Add(-1);
             }
 
             if (winScoreEntryPosition == i)
@@ -179,29 +157,30 @@ public class LeaderBoard : MonoBehaviour
     
     private void SubmitScore(int playerScore)
     {
-        for (int i = 0; i < numOfEnteries; i++)
+        for (int i = 0; i < leaderboardEntries.leaderboard.Count && i < numOfEnteries; i++)
         {
-            if (playerScore > topScores[i])
-            {
-                winScoreEntryPosition = i;
+            int curScore = leaderboardEntries.leaderboard[i].score;
+
+            if (playerScore <= curScore) continue;
+            
+            winScoreEntryPosition = i;
                 
-                topScores.Insert(i,playerScore);
-                topScores.RemoveAt(topScores.Count - 1);
-                SingleLeaderboardEntry newEntry = 
-                    new SingleLeaderboardEntry(playerScore, PlayerPrefs.GetString(PlayerPrefsKeys.UserName));
+            SingleLeaderboardEntry newEntry = 
+                new SingleLeaderboardEntry(playerScore, PlayerPrefs.GetString(PlayerPrefsKeys.UserName));
                                 
-                leaderboardEntries.leaderboard.Insert(i, newEntry);
-                if (leaderboardEntries.leaderboard.Count > numOfEnteries)
-                {
-                    leaderboardEntries.leaderboard.RemoveAt(leaderboardEntries.leaderboard.Count - 1);
-                }
-                break;
+            leaderboardEntries.leaderboard.Insert(i, newEntry);
+            if (leaderboardEntries.leaderboard.Count > numOfEnteries)
+            {
+                leaderboardEntries.leaderboard.RemoveAt(leaderboardEntries.leaderboard.Count - 1);
             }
+            
+            break;
         }
     }
     
     private bool IsScoreValid(int playerScore)
     {
-        return playerScore > topScores[topScores.Count - 1];
+        int lowestScore = leaderboardEntries.leaderboard[^1].score;
+        return playerScore > lowestScore;
     }
 }

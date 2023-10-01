@@ -22,6 +22,8 @@ public class PreGameWindow : MonoBehaviour
 
     private void OnButtonClick()
     {
+        
+        //add sound
         Hide();
         PlayerDidPressStart?.Invoke();
     }

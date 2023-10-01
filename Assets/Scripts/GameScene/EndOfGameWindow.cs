@@ -10,6 +10,7 @@ public class EndOfGameWindow : MonoBehaviour
 {
     [SerializeField] private Button retryButton;
     [SerializeField] private Button backToMenuButton;
+    [SerializeField] private SceneChanger sceneChanger;
     public TMP_Text message;
     public void Awake()
     {
@@ -20,12 +21,14 @@ public class EndOfGameWindow : MonoBehaviour
 
     private void OnBackToMenuButtonClick()
     {
-        SceneManager.LoadScene("Menu");
+        // AudioManager.Instance.PlayMenuButtonSound();
+        sceneChanger.FadeOutTrigger("Menu");
     }
 
     private void OnRetryButtonClick()
     {
-        SceneManager.LoadScene("Game");
+        // AudioManager.Instance.PlayMenuButtonSound();
+        sceneChanger.FadeOutTrigger("Game");
     }
 
     public void Show()

@@ -233,8 +233,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buttonComponent: {fileID: 4034537017012000642}
   buttonUp: {fileID: 1706731217923313833, guid: e980aa9411d40ea4d8a710c404a1f383, type: 3}
-  buttonPressed: {fileID: 8371362285786240412, guid: 34a20d22a7e1aed469e221ca3331f7af, type: 3}
-  textComponent: {fileID: 2484085407571661980}
+  buttonDown: {fileID: 8371362285786240412, guid: 34a20d22a7e1aed469e221ca3331f7af, type: 3}
   buttonSound: {fileID: 994068202554912240}
 --- !u!1 &3791384224710210763
 GameObject:
