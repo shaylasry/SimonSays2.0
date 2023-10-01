@@ -86,7 +86,8 @@ public class TestConfigurationLoader
         LoadJsonConfiguration();
         GameConfigurationHolder.Configuration = gameConfigurationFromJson;
         Assert.NotNull(gameConfigurationFromJson);
-        Assert.AreEqual(expectedConfigurations.configurations, GameConfigurationHolder.Configuration);
+        
+        Assert.AreEqual(expectedConfigurations.configurations, GameConfigurationHolder.Configuration.configurations);
         
         yield return null;
     }
@@ -124,6 +125,6 @@ public class TestConfigurationLoader
     {
         TextAsset jsonGameConfiguration = Resources.Load<TextAsset>("XML/XMLGameConfiguration");
         IConfigurationLoader configurationLoader = new XMLConfigurationLoader();
-        gameConfigurationFromJson = configurationLoader.LoadConfiguration<GameConfigurations>(jsonGameConfiguration.ToString());
+        gameConfigurationFromXml = configurationLoader.LoadConfiguration<GameConfigurations>(jsonGameConfiguration.ToString());
     }
 }
