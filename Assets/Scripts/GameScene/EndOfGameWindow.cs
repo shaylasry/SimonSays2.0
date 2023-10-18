@@ -21,13 +21,11 @@ public class EndOfGameWindow : MonoBehaviour
 
     private void OnBackToMenuButtonClick()
     {
-        // AudioManager.Instance.PlayMenuButtonSound();
         sceneChanger.FadeOutTrigger("Menu");
     }
 
     private void OnRetryButtonClick()
     {
-        // AudioManager.Instance.PlayMenuButtonSound();
         sceneChanger.FadeOutTrigger("Game");
     }
 
