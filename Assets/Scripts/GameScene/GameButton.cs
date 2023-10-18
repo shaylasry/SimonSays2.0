@@ -1,23 +1,28 @@
-using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class GameButton : MonoBehaviour
+public class GameButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     public Button buttonComponent;
     [SerializeField] private Sprite buttonUp;
-    [SerializeField] private Sprite buttonPressed;
+    [FormerlySerializedAs("buttonPressed")] [SerializeField] private Sprite buttonDown;
     public AudioSource buttonSound;
     
-    public void ButtonIsPressed()
+    public void SetButtonSprite(bool active)
     {
-        buttonComponent.image.sprite = buttonPressed;
+        buttonComponent.image.sprite = active ? buttonDown : buttonUp;
     }
-    
-    public void ButtonIsReleased()
+
+
+    public void OnPointerDown(PointerEventData eventData)
     {
-        buttonComponent.image.sprite = buttonUp;
+        SetButtonSprite(true);
     }
-    
-    
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        SetButtonSprite(false);
+    }
 }

@@ -7,6 +7,7 @@ public class MenuManager : MonoBehaviour
 {
     [SerializeField] private UserNameWindow userNameWindow;
     [SerializeField] private LevelSelectionMenu levelSelectionMenu;
+    [SerializeField] private SceneChanger sceneChanger;
     public MenuManagerState currentState { get; private set; } = MenuManagerState.UserNameInsertion;
 
     private void OnEnable()
@@ -22,18 +23,20 @@ public class MenuManager : MonoBehaviour
     //Use c# event so each game object can handle it's own functionality and we can still manage passing between Menu scene states
     private void Subscribe()
     {
-        UserNameWindow.PlayerDidEnterUserName += OnPlayerDidEnterUserName;
         LevelSelectionMenu.PlayerDidPickLevel += OnPlayerDidPickLevel;
     }
 
     private void Unsubscribe()
     {
-        UserNameWindow.PlayerDidEnterUserName -= OnPlayerDidEnterUserName;        
         LevelSelectionMenu.PlayerDidPickLevel -= OnPlayerDidPickLevel;
     }
 
     public void OnPlayerDidEnterUserName()
     {
+        if (PlayerPrefs.GetString(PlayerPrefsKeys.UserName) == "")
+        {
+            return;
+        }
         ChangeState(MenuManagerState.LevelSelection);
     }
 
@@ -77,7 +80,7 @@ public class MenuManager : MonoBehaviour
                 levelSelectionMenu.Show();
                 break;
             case MenuManagerState.StartGame:
-                SceneManager.LoadScene("Game");
+                sceneChanger.FadeOutTrigger("Game");
                 break;
         }
     }

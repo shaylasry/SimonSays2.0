@@ -2,12 +2,7 @@
 using System.IO;
 using System.Xml.Serialization;
 
-using System;
-using System.IO;
-using System.Xml.Serialization;
-using UnityEngine;
-
-public class XMLConfigurationLoader<T> : IConfigurationLoader
+public class XMLConfigurationLoader : IConfigurationLoader
 {
     public T LoadConfiguration<T>(string asset)
     {
@@ -22,8 +17,7 @@ public class XMLConfigurationLoader<T> : IConfigurationLoader
         }
         catch (Exception e)
         {
-            Debug.LogError("Error loading XML configuration: " + e.Message);
-            return default(T);
+            throw new Exception("Error loading XML configuration: " + e.Message);
         }
     }
 }

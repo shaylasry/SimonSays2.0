@@ -1,44 +1,33 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
     
     public GameManagerState currentState { get; private set; } = GameManagerState.Idle;
     public static Action<int> PlayerDidWin;
+    public static Action<GameButton[]> GameDidStart;
 
     //Level configuration instance
     private SingleGameConfiguration levelConfiguration = LevelConfigurationHolder.Configuration;
     
     //Game data instances
-    private int score;
-    private float baseDelayBetweenLightUp = 0.5f;
-    [SerializeField] private TMP_Text scoreText;
-    private float countdownTime;
-    [SerializeField] private TMP_Text countdownText;
-    private Coroutine countdownCoroutine;
     [SerializeField] private EndOfGameWindow endOfGameWindow;
-
+    private int score;
+    
     //Play sequence state instances
     private int playerCurPlaySequenceListIndex;
-    private List<GameButton> playSequnce = new List<GameButton>();
     
     //Game objects instances
+    [SerializeField] private GameController gameController;
     [SerializeField] private GameObject board;
     [SerializeField] private GameButton gameButtonPrefab;
     [SerializeField] private GameButton [] gameButtons;
-    [SerializeField] private Color[] gameButtonsColors;
-    [SerializeField] private AudioClip[] gameButtonsSounds;
-    
+    [SerializeField] private GameButtonsData gameButtonsData;
 
     void Start()
     {
         InitiateBoard();
-        InitiateTime();
     }
 
     private void OnEnable()
@@ -56,18 +45,32 @@ public class GameManager : MonoBehaviour
     {
         PreGameWindow.PlayerDidPressStart += OnPlayerDidPressStart;
         LeaderBoard.PlayerClosedLeaderBoard += OnPlayerClosedLeaderBoard;
-
+        GameController.SendPlayerScore += OnGameControllerSentScore;
     }
     
     private void Unsubscribe()
     {
         PreGameWindow.PlayerDidPressStart -= OnPlayerDidPressStart;
         LeaderBoard.PlayerClosedLeaderBoard -= OnPlayerClosedLeaderBoard;
+        GameController.SendPlayerScore -= OnGameControllerSentScore;
+    }
+
+    private void OnGameControllerSentScore(int playerScore)
+    {
+        if (playerScore < 0)
+        {
+            ChangeState(GameManagerState.Lose);
+        }
+        else
+        {
+            score = playerScore;
+            ChangeState(GameManagerState.Win);
+        }
     }
 
     private void OnPlayerDidPressStart()
     {
-        ChangeState(GameManagerState.SequencePlay);
+        ChangeState(GameManagerState.Running);
     }
     private void OnPlayerClosedLeaderBoard()
     {
@@ -75,11 +78,6 @@ public class GameManager : MonoBehaviour
         endOfGameWindow.Show();
     }
     
-    private void InitiateTime()
-    {
-        countdownTime = levelConfiguration.gameTime;
-        countdownText.text = $"Time: {countdownTime}";
-    }
     private void InitiateBoard()
     {
         gameButtons = new GameButton[levelConfiguration.numOfGameButtons];
@@ -89,97 +87,18 @@ public class GameManager : MonoBehaviour
             GameButton newGameButton = Instantiate(gameButtonPrefab, board.transform);
             
             newGameButton.buttonComponent.onClick.AddListener(() => OnGameButtonClick(newGameButton));
-            newGameButton.buttonComponent.image.color = gameButtonsColors[i];
-            newGameButton.buttonSound.clip = gameButtonsSounds[i];
+            newGameButton.buttonComponent.image.color = gameButtonsData.gameButtonsColors[i];
+            newGameButton.buttonSound.clip = gameButtonsData.gameButtonsSounds[i];
 
             gameButtons[i] = newGameButton;
         }
     }
-    
-    private IEnumerator CountdownRoutine()
-    {
-        while (countdownTime > 0)
-        {
-            countdownTime -= 1.0f;
-            countdownText.text = $"Time: {countdownTime}";
-            yield return new WaitForSeconds(1.0f);
-        }
-        ChangeState(GameManagerState.Win);
-    }
-    
+
     private void OnGameButtonClick(GameButton gameButton)
     {
         //Player can't push button when it's not his turn to play
-        if (currentState == GameManagerState.PlayerTurn)
-        {
-            StartCoroutine(PlayerButtonClickRoutine(gameButton));
-        }
-    }
-
-    private IEnumerator PlayerButtonClickRoutine(GameButton gameButton)
-    {
-        yield return new WaitForSeconds(0.2f);
-        
-        gameButton.ButtonIsPressed();
-        gameButton.buttonSound.Play();
-
-        score += levelConfiguration.pointsPerStep;
-        scoreText.text = $"score: {score}";
-        
-        yield return new WaitForSeconds(0.2f);
-        gameButton.ButtonIsReleased();
-        
-        //if button not match the game has ended
-        if (gameButton != playSequnce[playerCurPlaySequenceListIndex])
-        {
-            ChangeState(GameManagerState.Lose);
-        }
-        else
-        {
-            playerCurPlaySequenceListIndex++;
-            if (playerCurPlaySequenceListIndex >= playSequnce.Count)
-            {
-                ChangeState(GameManagerState.SequencePlay);
-            }
-        }
-    }
-
-    private void PlaySequence()
-    {
-        int randomButtonIndex = Random.Range(0, gameButtons.Length);
-        GameButton randomButton = gameButtons[randomButtonIndex];
-        playSequnce.Add(randomButton);
-
-        StartCoroutine(SequencePlayRoutine());
-    }
-    
-    private IEnumerator SequencePlayRoutine()
-    {
-        int startIndex = 0;
-        if (!levelConfiguration.repeatMode)
-        {
-            startIndex = playSequnce.Count - 1;
-        }
-        
-        //Calculation of the wait delay time according to the game speed configuration
-        float delay = baseDelayBetweenLightUp / levelConfiguration.gameSpeed;
-        
-        for (int i = startIndex; i < playSequnce.Count; i++)
-        {
-            yield return new WaitForSeconds(delay);
-            
-            GameButton gameButton = playSequnce[i];
-            
-            yield return new WaitForSeconds(0.2f);
-        
-            gameButton.ButtonIsPressed();
-            gameButton.buttonSound.Play();
-
-            yield return new WaitForSeconds(0.2f);
-            gameButton.ButtonIsReleased();
-        }
-        
-        ChangeState(GameManagerState.PlayerTurn);
+        if (gameController.currentState != GameController.GameState.PlayerTurn) return;
+        gameController.PlayerClickedOnGameButton(gameButton);
     }
 
     private bool ChangeState(GameManagerState newState)
@@ -188,23 +107,14 @@ public class GameManager : MonoBehaviour
         switch (currentState)
         {
             case GameManagerState.Idle:
-                if (newState != GameManagerState.SequencePlay) break;
-                countdownCoroutine = StartCoroutine(CountdownRoutine());
+                if (newState != GameManagerState.Running) break;
                 currentState = newState;
                 didChange = true;
                 break;
             
-            case GameManagerState.SequencePlay:
+            case GameManagerState.Running:
                 if (newState != GameManagerState.Win &&
-                    newState != GameManagerState.PlayerTurn) break;
-                currentState = newState;
-                didChange = true;
-                break;
-            
-            case GameManagerState.PlayerTurn:
-                if (newState != GameManagerState.Win &&
-                    newState != GameManagerState.Lose &&
-                    newState != GameManagerState.SequencePlay) break;
+                    newState != GameManagerState.Lose) break;
                 currentState = newState;
                 didChange = true;
                 break;
@@ -221,17 +131,13 @@ public class GameManager : MonoBehaviour
         {
             case GameManagerState.Idle:
                 break;
-            case GameManagerState.SequencePlay:
-                PlaySequence();
-                break;
-            case GameManagerState.PlayerTurn:
-                playerCurPlaySequenceListIndex = 0;
+            case GameManagerState.Running:
+                GameDidStart?.Invoke(gameButtons);
                 break;
             case GameManagerState.Win:
                 PlayerDidWin?.Invoke(score);
                 break;
             case GameManagerState.Lose:
-                StopCoroutine(countdownCoroutine);
                 endOfGameWindow.message.text = "Something was missing...";
                 endOfGameWindow.Show();
                 break;
@@ -241,8 +147,7 @@ public class GameManager : MonoBehaviour
     public enum GameManagerState 
     {
         Idle,
-        SequencePlay,
-        PlayerTurn,
+        Running,
         Win,
         Lose
     }

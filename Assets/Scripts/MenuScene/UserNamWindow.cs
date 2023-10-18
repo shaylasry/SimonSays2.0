@@ -7,16 +7,9 @@ using UnityEngine.UI;
 
 public class UserNameWindow : MonoBehaviour
 {
-    public static Action PlayerDidEnterUserName;
-
     [SerializeField] private Button okButton;
     [SerializeField] private TMP_InputField inputFiled;
     
-    private void Start()
-    {
-        okButton.onClick.AddListener(OnOkButtonClick);
-    }
-
     public void Show()
     {
         gameObject.SetActive(true);
@@ -27,9 +20,8 @@ public class UserNameWindow : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private void OnOkButtonClick()
+    public void OnOkButtonClick()
     {
         PlayerPrefs.SetString(PlayerPrefsKeys.UserName, inputFiled.text);
-        PlayerDidEnterUserName?.Invoke();
     }
 }

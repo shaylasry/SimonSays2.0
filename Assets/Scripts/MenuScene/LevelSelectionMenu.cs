@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -6,16 +7,15 @@ using UnityEngine.UI;
 
 public class LevelSelectionMenu : MonoBehaviour
 {
+    public static Action PlayerDidPickLevel;
+    
     private IConfigurationLoader configurationLoader;
 
     [SerializeField] private DataSerializationHolder gameConfigurationFileHolder;
-    
     [SerializeField] private GameObject levelMenu;
-    private GameConfigurations gameConfiguration;
-
-    public static Action PlayerDidPickLevel;
-
     [SerializeField] private Button levelButtonPrefab;
+
+
     private void Awake()
     {
         Hide();
@@ -28,11 +28,8 @@ public class LevelSelectionMenu : MonoBehaviour
     {
         InitiateConfigurationLoader(gameConfigurationFileHolder.fileExtensionType);
         var textAsset = gameConfigurationFileHolder.DataSerializationFileAsset;
-        GameConfigurations loadedConfiguration =
-            configurationLoader.LoadConfiguration<GameConfigurations>(textAsset.ToString());
-
-        GameConfigurationHolder.UpdateConfiguration(loadedConfiguration);
-        gameConfiguration = GameConfigurationHolder.Configuration;
+        
+        GameConfigurationHolder.Configuration =  configurationLoader.LoadConfiguration<GameConfigurations>(textAsset.ToString());
     }
 
     //use fileExtensionType to chose configuration according to the TextAsset extension type
@@ -47,10 +44,10 @@ public class LevelSelectionMenu : MonoBehaviour
         switch (fileExtensionType.ToLower())
         {
             case "json":
-                configurationLoader = new JsonConfigurationLoader<GameConfigurations>();
+                configurationLoader = new JsonConfigurationLoader();
                 break;
             case "xml":
-                configurationLoader = new XMLConfigurationLoader<GameConfigurations>();
+                configurationLoader = new XMLConfigurationLoader();
                 break;
             default:
                 throw new ArgumentException("Unsupported file extension type: " + fileExtensionType);
@@ -69,7 +66,7 @@ public class LevelSelectionMenu : MonoBehaviour
     
     private void InitiateLevelMenu()
     {
-        foreach (SingleGameConfiguration targetConfig in gameConfiguration.configurations)
+        foreach (SingleGameConfiguration targetConfig in GameConfigurationHolder.Configuration.configurations)
         {
             Button newButton = Instantiate(levelButtonPrefab, levelMenu.transform);
             TMP_Text levelButtonText = newButton.GetComponentInChildren<TMP_Text>();
@@ -85,12 +82,13 @@ public class LevelSelectionMenu : MonoBehaviour
 
     public void OnLevelButtonClick(string clickedButtonId)
     {
-        var configuration = gameConfiguration.configurations;
+//add sound
+        List<SingleGameConfiguration> configuration = GameConfigurationHolder.Configuration.configurations;
         var selectedConfig = configuration.First(config => config.id == clickedButtonId);
 
         if (selectedConfig.id == "") return;
         
-        LevelConfigurationHolder.UpdateConfiguration(selectedConfig);
+        LevelConfigurationHolder.Configuration = selectedConfig;
         PlayerDidPickLevel?.Invoke();
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class JsonConfigurationLoader<T>: IConfigurationLoader
+public class JsonConfigurationLoader: IConfigurationLoader
 {
     public T LoadConfiguration<T>(string asset)
     {
@@ -13,7 +13,7 @@ public class JsonConfigurationLoader<T>: IConfigurationLoader
         }
         catch (Exception e)
         {
-            throw e;
+            throw new Exception("Error loading Json configuration: " + e.Message);
         }
     }
 }

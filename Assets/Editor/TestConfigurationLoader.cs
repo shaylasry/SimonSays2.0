@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -8,122 +9,122 @@ public class TestConfigurationLoader
     private GameConfigurations gameConfigurationFromJson;
     private GameConfigurations gameConfigurationFromXml;
 
+    private SingleGameConfiguration badSingleGameConfiguration = new SingleGameConfiguration()
+    {
+        id = "easy",
+        title = "Easy",
+        numOfGameButtons = 4,
+        pointsPerStep = 1,
+        gameTime = 5,
+        repeatMode = true,
+        gameSpeed = 1.0f,
+    };
+    
+    private GameConfigurations expectedConfigurations = new GameConfigurations()
+    {
+        configurations = new List<SingleGameConfiguration>()
+        {
+            new SingleGameConfiguration()
+            {
+                id = "easy",
+                title = "Easy",
+                numOfGameButtons = 4,
+                pointsPerStep = 1,
+                gameTime = 50,
+                repeatMode = true,
+                gameSpeed = 1.0f,
+            },
+            new SingleGameConfiguration()
+            {
+                id = "medium",
+                title = "Medium",
+                numOfGameButtons = 5,
+                pointsPerStep = 2,
+                gameTime = 45,
+                repeatMode = true,
+                gameSpeed = 1.25f,
+            },
+            new SingleGameConfiguration()
+            {
+                id = "hard",
+                title = "Hard",
+                numOfGameButtons = 6,
+                pointsPerStep = 3,
+                gameTime = 30,
+                repeatMode = false,
+                gameSpeed = 1.5f,
+            }
+        }
+    };
+
     [UnityTest]
-    public IEnumerator LoadGameConfigurationFromJson()
+    public IEnumerator Should_SuccessfulLoadJsonConfiguration_When_GameConfigurationsAreValid()
     {
         LoadJsonConfiguration();
+        
         Assert.NotNull(gameConfigurationFromJson);
-        //check all the id's are in
-        Assert.AreEqual(3, gameConfigurationFromJson.configurations.Count);
-        
-        Assert.AreEqual("easy", gameConfigurationFromJson.configurations[0].id);
-        Assert.AreEqual("Easy", gameConfigurationFromJson.configurations[0].title);
-        Assert.AreEqual(4, gameConfigurationFromJson.configurations[0].numOfGameButtons);
-        Assert.AreEqual(1, gameConfigurationFromJson.configurations[0].pointsPerStep);
-        Assert.AreEqual(50, gameConfigurationFromJson.configurations[0].gameTime);
-        Assert.AreEqual(true, gameConfigurationFromJson.configurations[0].repeatMode);
-        Assert.AreEqual(1.0f, gameConfigurationFromJson.configurations[0].gameSpeed);
-
-        Assert.AreEqual("medium", gameConfigurationFromJson.configurations[1].id);
-        Assert.AreEqual("Medium", gameConfigurationFromJson.configurations[1].title);
-        Assert.AreEqual(5, gameConfigurationFromJson.configurations[1].numOfGameButtons);
-        Assert.AreEqual(2, gameConfigurationFromJson.configurations[1].pointsPerStep);
-        Assert.AreEqual(45, gameConfigurationFromJson.configurations[1].gameTime);
-        Assert.AreEqual(true, gameConfigurationFromJson.configurations[1].repeatMode);
-        Assert.AreEqual(1.25f, gameConfigurationFromJson.configurations[1].gameSpeed);
-
-        Assert.AreEqual("hard", gameConfigurationFromJson.configurations[2].id);
-        Assert.AreEqual("Hard", gameConfigurationFromJson.configurations[2].title);
-        Assert.AreEqual(6, gameConfigurationFromJson.configurations[2].numOfGameButtons);
-        Assert.AreEqual(3, gameConfigurationFromJson.configurations[2].pointsPerStep);
-        Assert.AreEqual(30, gameConfigurationFromJson.configurations[2].gameTime);
-        Assert.AreEqual(false, gameConfigurationFromJson.configurations[2].repeatMode);
-        Assert.AreEqual(1.5f, gameConfigurationFromJson.configurations[2].gameSpeed);
-        
-
+        Assert.AreEqual(expectedConfigurations.configurations.Count, gameConfigurationFromJson.configurations.Count);
+       
+        Assert.AreEqual(expectedConfigurations.configurations, gameConfigurationFromJson.configurations);
         yield return null;
     }
     
     [UnityTest]
-    public IEnumerator UpdateGameConfigurationHolderSingleton()
+    public IEnumerator Should_LoadWrongJsonConfiguration_When_GameConfigurationAreUnmatched()
     {
         LoadJsonConfiguration();
-        GameConfigurationHolder.UpdateConfiguration(gameConfigurationFromJson);
+        
+        Assert.NotNull(gameConfigurationFromJson);
+       
+        Assert.AreNotEqual(badSingleGameConfiguration, gameConfigurationFromJson.configurations[0]);
+        yield return null;
+    }
+    
+    [UnityTest]
+    public IEnumerator Should_SuccessfulUpdateGameConfigurationHolder_When_GameConfigurationsAreValid()
+    {
+        LoadJsonConfiguration();
+        GameConfigurationHolder.Configuration = gameConfigurationFromJson;
         Assert.NotNull(gameConfigurationFromJson);
         
-        Assert.AreEqual("easy", GameConfigurationHolder.Configuration.configurations[0].id);
-        Assert.AreEqual("Easy", GameConfigurationHolder.Configuration.configurations[0].title);
-        Assert.AreEqual(4, GameConfigurationHolder.Configuration.configurations[0].numOfGameButtons);
-        Assert.AreEqual(1, GameConfigurationHolder.Configuration.configurations[0].pointsPerStep);
-        Assert.AreEqual(50, GameConfigurationHolder.Configuration.configurations[0].gameTime);
-        Assert.AreEqual(true, GameConfigurationHolder.Configuration.configurations[0].repeatMode);
-        Assert.AreEqual(1.0f, GameConfigurationHolder.Configuration.configurations[0].gameSpeed);
-
-        Assert.AreEqual("medium", GameConfigurationHolder.Configuration.configurations[1].id);
-        Assert.AreEqual("Medium", GameConfigurationHolder.Configuration.configurations[1].title);
-        Assert.AreEqual(5, GameConfigurationHolder.Configuration.configurations[1].numOfGameButtons);
-        Assert.AreEqual(2, GameConfigurationHolder.Configuration.configurations[1].pointsPerStep);
-        Assert.AreEqual(45, GameConfigurationHolder.Configuration.configurations[1].gameTime);
-        Assert.AreEqual(true, GameConfigurationHolder.Configuration.configurations[1].repeatMode);
-        Assert.AreEqual(1.25f, GameConfigurationHolder.Configuration.configurations[1].gameSpeed);
-
-        Assert.AreEqual("hard", GameConfigurationHolder.Configuration.configurations[2].id);
-        Assert.AreEqual("Hard", GameConfigurationHolder.Configuration.configurations[2].title);
-        Assert.AreEqual(6, GameConfigurationHolder.Configuration.configurations[2].numOfGameButtons);
-        Assert.AreEqual(3, GameConfigurationHolder.Configuration.configurations[2].pointsPerStep);
-        Assert.AreEqual(30, GameConfigurationHolder.Configuration.configurations[2].gameTime);
-        Assert.AreEqual(false, GameConfigurationHolder.Configuration.configurations[2].repeatMode);
-        Assert.AreEqual(1.5f, GameConfigurationHolder.Configuration.configurations[2].gameSpeed);
+        Assert.AreEqual(expectedConfigurations.configurations, GameConfigurationHolder.Configuration.configurations);
         
         yield return null;
     }
 
     [UnityTest]
-    public IEnumerator XMLLoadConfigurationTest()
+    public IEnumerator Should_SuccessfulLoadXMLConfiguration_When_GameConfigurationsAreValid()
     {
         LoadXmlConfiguration();
         Assert.NotNull(gameConfigurationFromXml);
-        //check all the id's are in
-        Assert.AreEqual(3, gameConfigurationFromJson.configurations.Count);
+        Assert.AreEqual(expectedConfigurations.configurations.Count, gameConfigurationFromXml.configurations.Count);
+       
+        Assert.AreEqual(expectedConfigurations.configurations, gameConfigurationFromXml.configurations);
         
-        Assert.AreEqual("easy", gameConfigurationFromJson.configurations[0].id);
-        Assert.AreEqual("Easy", gameConfigurationFromJson.configurations[0].title);
-        Assert.AreEqual(4, gameConfigurationFromJson.configurations[0].numOfGameButtons);
-        Assert.AreEqual(1, gameConfigurationFromJson.configurations[0].pointsPerStep);
-        Assert.AreEqual(50, gameConfigurationFromJson.configurations[0].gameTime);
-        Assert.AreEqual(true, gameConfigurationFromJson.configurations[0].repeatMode);
-        Assert.AreEqual(1.0f, gameConfigurationFromJson.configurations[0].gameSpeed);
-
-        Assert.AreEqual("medium", gameConfigurationFromJson.configurations[1].id);
-        Assert.AreEqual("Medium", gameConfigurationFromJson.configurations[1].title);
-        Assert.AreEqual(5, gameConfigurationFromJson.configurations[1].numOfGameButtons);
-        Assert.AreEqual(2, gameConfigurationFromJson.configurations[1].pointsPerStep);
-        Assert.AreEqual(45, gameConfigurationFromJson.configurations[1].gameTime);
-        Assert.AreEqual(true, gameConfigurationFromJson.configurations[1].repeatMode);
-        Assert.AreEqual(1.25f, gameConfigurationFromJson.configurations[1].gameSpeed);
-
-        Assert.AreEqual("hard", gameConfigurationFromJson.configurations[2].id);
-        Assert.AreEqual("Hard", gameConfigurationFromJson.configurations[2].title);
-        Assert.AreEqual(6, gameConfigurationFromJson.configurations[2].numOfGameButtons);
-        Assert.AreEqual(3, gameConfigurationFromJson.configurations[2].pointsPerStep);
-        Assert.AreEqual(30, gameConfigurationFromJson.configurations[2].gameTime);
-        Assert.AreEqual(false, gameConfigurationFromJson.configurations[2].repeatMode);
-        Assert.AreEqual(1.5f, gameConfigurationFromJson.configurations[2].gameSpeed);
+        yield return null;
+    }
+    [UnityTest]
+    public IEnumerator Should_LoadWrongXMLConfiguration_When_GameConfigurationAreUnmatched()
+    {
+        LoadXmlConfiguration();
         
+        Assert.NotNull(gameConfigurationFromJson);
+       
+        Assert.AreNotEqual(badSingleGameConfiguration, gameConfigurationFromXml.configurations[0]);
         yield return null;
     }
     
     public void LoadJsonConfiguration()
     {
         TextAsset jsonGameConfiguration = Resources.Load<TextAsset>("Json/JsonGameConfiguration");
-        IConfigurationLoader configurationLoader = new JsonConfigurationLoader<GameConfigurations>();
+        IConfigurationLoader configurationLoader = new JsonConfigurationLoader();
         gameConfigurationFromJson = configurationLoader.LoadConfiguration<GameConfigurations>(jsonGameConfiguration.ToString());
     }
 
     private void LoadXmlConfiguration()
     {
         TextAsset jsonGameConfiguration = Resources.Load<TextAsset>("XML/XMLGameConfiguration");
-        IConfigurationLoader configurationLoader = new XMLConfigurationLoader<GameConfigurations>();
-        gameConfigurationFromJson = configurationLoader.LoadConfiguration<GameConfigurations>(jsonGameConfiguration.ToString());
+        IConfigurationLoader configurationLoader = new XMLConfigurationLoader();
+        gameConfigurationFromXml = configurationLoader.LoadConfiguration<GameConfigurations>(jsonGameConfiguration.ToString());
     }
 }
